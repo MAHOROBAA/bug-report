@@ -27,44 +27,44 @@ html,
 body {
   margin: 0;
   padding: 0;
+  width: 100%;
+  max-width: 1200px;
+  min-height: 100vh;
   font-family: 'Pretendard Variable', Pretendard, -apple-system,
     BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
-  font-weight: 400;
+  font-weight: 500;
+  font-size: 16px;
   color: #2b2b38;
-  background-color: #fafafa;
+  background-color: #fff;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
+  box-sizing: border-box;
+}
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
 }
 
 /* 앱 전체 레이아웃 */
 .app_wrap {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
+  margin: 0 auto;
+  padding: 76px 20px 20px;
 }
 
 .main_content {
-  flex: 1;
-  padding: 24px;
+  width: 100%;
   max-width: 1200px;
-  margin: 0 auto;
-}
-
-/* 폰트 가중치 활용 예시 */
-.medium {
-  font-weight: 500;
-}
-.bold {
-  font-weight: 700;
-}
-.extrabold {
-  font-weight: 800;
+  margin: 50px auto;
 }
 
 /* 모바일 대응 */
-@media (max-width: 430px) {
+@media screen and (max-width: 430px) {
+  .app_wrap {
+    padding: 50px 20px 20px;
+  }
   .main_content {
-    padding: 20px;
+    margin: 40px auto;
   }
 }
 </style>

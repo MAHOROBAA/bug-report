@@ -4,19 +4,30 @@
   </header>
 </template>
 
-<style scoped>
+<style>
 .header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 60px;
+  width: 100%;
+  height: 76px;
   background: #fff;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid #eff1f5;
 }
 
 h1 {
-  font-weight: 700;
-  color: #4a4a58;
+  font-weight: 800;
+  color: #535764;
   font-size: 20px;
+}
+
+@media (max-width: 430px) {
+  .header {
+    height: 52px;
+  }
 }
 </style>
