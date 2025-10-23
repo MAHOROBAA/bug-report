@@ -78,15 +78,7 @@
               :class="{ open: report.isOpen }"
               @click="toggleExpand(index)"
             >
-              <img
-                :src="
-                  report.isOpen
-                    ? '/src/assets/images/close_icon.png'
-                    : '/src/assets/images/open_icon.png'
-                "
-                :class="{ rotated: report.isOpen }"
-                alt="toggle icon"
-              />
+              <img :src="report.iconSrc" alt="toggle icon" />
             </div>
           </div>
           <div class="item_right">
@@ -196,61 +188,92 @@ const reports = ref([
     content:
       '리포트 내용 리포트 내용 리포트 내용 리포트 내용 리포트 내용 리포트 내용 리포트 내용 리포트 내용 리포트 내용',
     registered: '2025-10-22 12:34',
-    isOpen: true
+    isOpen: true,
+    iconSrc: '/src/assets/images/close_icon.png'
   },
   {
     category: '☣ 말바꾸기',
     date: '2025-10-21 09:10',
     content: '말을 바꾸는 패턴이 반복되어 기록함',
     registered: '2025-10-21 10:00',
-    isOpen: false
+    isOpen: false,
+    iconSrc: '/src/assets/images/open_icon.png'
   },
   {
     category: '☣ 말바꾸기',
     date: '2025-10-21 09:10',
     content: '말을 바꾸는 패턴이 반복되어 기록함',
     registered: '2025-10-21 10:00',
-    isOpen: false
+    isOpen: false,
+    iconSrc: '/src/assets/images/open_icon.png'
   },
   {
     category: '☣ 말바꾸기',
     date: '2025-10-21 09:10',
     content: '말을 바꾸는 패턴이 반복되어 기록함',
     registered: '2025-10-21 10:00',
-    isOpen: false
+    isOpen: false,
+    iconSrc: '/src/assets/images/open_icon.png'
   },
   {
     category: '☣ 말바꾸기',
     date: '2025-10-21 09:10',
     content: '말을 바꾸는 패턴이 반복되어 기록함',
     registered: '2025-10-21 10:00',
-    isOpen: false
+    isOpen: false,
+    iconSrc: '/src/assets/images/open_icon.png'
   },
   {
     category: '☣ 말바꾸기',
     date: '2025-10-21 09:10',
     content: '말을 바꾸는 패턴이 반복되어 기록함',
     registered: '2025-10-21 10:00',
-    isOpen: false
+    isOpen: false,
+    iconSrc: '/src/assets/images/open_icon.png'
   },
   {
     category: '☣ 말바꾸기',
     date: '2025-10-21 09:10',
     content: '말을 바꾸는 패턴이 반복되어 기록함',
     registered: '2025-10-21 10:00',
-    isOpen: false
+    isOpen: false,
+    iconSrc: '/src/assets/images/open_icon.png'
   },
   {
     category: '☣ 말바꾸기',
     date: '2025-10-21 09:10',
     content: '말을 바꾸는 패턴이 반복되어 기록함',
     registered: '2025-10-21 10:00',
-    isOpen: false
+    isOpen: false,
+    iconSrc: '/src/assets/images/open_icon.png'
   }
 ]);
 
 const toggleExpand = (index) => {
-  reports.value[index].isOpen = !reports.value[index].isOpen;
+  const report = reports.value[index];
+  const img = document.querySelectorAll('.item_icon img')[index];
+
+  report.isOpen = !report.isOpen;
+
+  // 회전 방향 애니메이션
+  img.classList.remove('rotated', 'unrotated', 'fade');
+  void img.offsetWidth;
+  img.classList.add(report.isOpen ? 'rotated' : 'unrotated');
+
+  // 페이드 아웃 후 이미지 교체
+  img.classList.add('fade-out');
+  setTimeout(() => {
+    report.iconSrc = report.isOpen
+      ? '/src/assets/images/close_icon.png'
+      : '/src/assets/images/open_icon.png';
+    img.classList.remove('fade-out');
+    img.classList.add('fade-in');
+  }, 400);
+
+  // 페이드 애니메이션 종료 후 초기화
+  setTimeout(() => {
+    img.classList.remove('fade-in');
+  }, 800);
 };
 
 // TOP 버튼 노출 제어

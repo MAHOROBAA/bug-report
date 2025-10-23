@@ -220,15 +220,67 @@ input {
   border-radius: $border-radius-sm;
 }
 
-.item_icon,
+.item_icon {
+  width: 24px;
+  height: 24px;
+}
 .item_icon img {
   width: 24px;
   height: 24px;
-  transition: transform 0.2s ease;
+  transition: transform 0.8s ease, opacity 0.4s ease;
+  will-change: transform, opacity;
+  display: block;
 }
 
+/* 열릴 때: 정방향 회전 */
 .item_icon img.rotated {
-  transform: rotate(360deg); // 360도 회전
+  animation: bounceRotateForward 0.8s ease;
+}
+
+/* 닫힐 때: 역방향 회전 */
+.item_icon img.unrotated {
+  animation: bounceRotateBackward 0.8s ease;
+}
+
+/* 부드러운 페이드 전환 */
+.fade-out {
+  opacity: 0;
+}
+
+.fade-in {
+  opacity: 1;
+  transition: opacity 0.4s ease;
+}
+
+/* 기존 회전 bounce 애니메이션 */
+@keyframes bounceRotateForward {
+  0% {
+    transform: rotate(0deg) scale(1);
+  }
+  50% {
+    transform: rotate(360deg) scale(1.4);
+  }
+  70% {
+    transform: rotate(360deg) scale(1.1);
+  }
+  100% {
+    transform: rotate(360deg) scale(1);
+  }
+}
+
+@keyframes bounceRotateBackward {
+  0% {
+    transform: rotate(0deg) scale(1);
+  }
+  50% {
+    transform: rotate(-360deg) scale(1.4);
+  }
+  70% {
+    transform: rotate(-360deg) scale(1.1);
+  }
+  100% {
+    transform: rotate(-360deg) scale(1);
+  }
 }
 
 .item_image {
