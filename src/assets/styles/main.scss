@@ -1,7 +1,114 @@
-@import './base/variables';
-@import './base/mixins';
-@import './app';
-@import './header';
-@import './modal';
-@import './report_form';
-@import './report_list';
+// ==================================================
+// 🎨 main.scss (최종 통합 버전)
+// ==================================================
+
+// 전역 기본 세팅
+@import 'base/variables';
+@import 'base/mixins';
+
+// 개별 SCSS 모듈
+@import 'app';
+@import 'header';
+@import 'modal';
+@import 'report_form';
+@import 'report_list';
+
+// ==================================================
+// 🌈 Theme System (Light + Dark Variables)
+// ==================================================
+
+// ----------------------------
+// 🎨 Light Theme (기본)
+// ----------------------------
+:root {
+  --color-bg: #{$color-white};
+  --color-text: #{$color-black};
+  --color-border: #{$color-gray-100};
+  --color-surface: #{$color-gray-300};
+  --color-subtext: #{$color-gray-600};
+  --color-accent-main: #{$color-purple-main};
+  --color-accent-sub: #{$color-blue-main};
+  --color-accent-text: #{$color-purple-text};
+  --color-accent-light: #{$color-purple-light};
+}
+
+// ----------------------------
+// 🌙 Dark Theme (감성 커스텀형)
+// ----------------------------
+[data-theme='dark'] {
+  --color-bg: #{$color-bg-dark};
+  --color-text: #{$color-text-dark};
+  --color-border: #{$color-border-dark};
+  --color-surface: #{$color-card-dark};
+  --color-subtext: #{$color-subtext-dark};
+  --color-accent-main: #{$color-accent-dark};
+  --color-accent-sub: #{$color-accent2-dark};
+}
+
+// ==================================================
+// 💫 Global Theme Application
+// ==================================================
+html {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+}
+
+// ==================================================
+// 🌗 Dark Mode Overrides (Component Specific)
+// ==================================================
+[data-theme='dark'] {
+  .modal_box {
+    background: var(--color-surface);
+    color: var(--color-text);
+  }
+
+  .modal_title {
+    color: var(--color-text);
+  }
+
+  .report_form,
+  .report_list,
+  .custom_select {
+    background: var(--color-bg);
+    color: var(--color-text);
+    border-color: var(--color-border);
+  }
+
+  input,
+  textarea {
+    background: var(--color-surface);
+    color: var(--color-text);
+    border-color: var(--color-border);
+
+    &::placeholder {
+      color: var(--color-subtext);
+    }
+  }
+
+  .btn_ok {
+    background: linear-gradient(
+      124deg,
+      var(--color-accent-main),
+      var(--color-accent-sub)
+    );
+  }
+
+  .btn_edit {
+    border-color: var(--color-accent-main);
+    color: var(--color-accent-main);
+  }
+
+  .btn_delete {
+    background: var(--color-border);
+  }
+
+  .line {
+    border-bottom-color: var(--color-border);
+  }
+}

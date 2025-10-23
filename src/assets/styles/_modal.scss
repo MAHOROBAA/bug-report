@@ -1,27 +1,26 @@
+// ----------------------------
+// 🪟 Modal (공통 팝업 스타일)
+// ----------------------------
 .modal_overlay {
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.35);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  @include flex-center();
   z-index: 999;
 }
 
 .modal_box {
   width: 353px;
-  background: #fff;
-  border-radius: 20px;
-  padding: 20px 20px;
+  @include box($color-white, $border-radius-lg, 20px);
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  animation: fadeIn 0.2s ease;
+  gap: $gap-sm;
+  animation: fadeIn $transition-fast;
 }
 
 .modal_title {
   font-size: 20px;
-  font-weight: 700;
+  font-weight: $font-weight-bold;
   line-height: 1.4;
   color: #2a2929;
   text-align: center;
@@ -29,37 +28,35 @@
 }
 
 .modal_message {
-  font-size: 16px;
-  color: #b5b5b5;
+  font-size: $font-size-base;
+  color: $color-gray-700;
   white-space: pre-line;
 }
 
+// ----------------------------
+// 🧩 도움말 (Help 전용 스타일)
+// ----------------------------
 .help_text {
-  font-size: 16px;
-  font-weight: 500;
+  font-size: $font-size-base;
+  font-weight: $font-weight-regular;
   line-height: 1.5;
-  color: #b5b5b5;
+  color: $color-gray-700;
 }
 
 .line {
   height: 1px;
   width: 100%;
   margin: 6px auto;
-  border-bottom: 1px solid #eff1f5;
+  border-bottom: 1px solid $color-gray-100;
 }
 
 .help_actions {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
+  @include flex-center(row);
 }
 
 .help_action {
-  display: flex;
-  flex-direction: row;
+  @include flex-center(row);
   gap: 10px;
-  align-items: center;
-  justify-content: center;
   flex: 1;
 }
 
@@ -68,44 +65,40 @@
   height: 24px;
 }
 
+// ----------------------------
+// 🔘 버튼 영역
+// ----------------------------
 .modal_buttons {
-  display: flex;
-  justify-content: center;
+  @include flex-center(row);
   gap: 10px;
   margin-top: 10px;
 }
 
-.btn_ok,
+.btn_ok {
+  @include button-base($gradient-main);
+  width: 100%;
+}
+
 .btn_confirm,
 .btn_cancel {
-  flex: 1;
-  height: 52px;
-  border-radius: 8px;
-  font-size: 16px;
-  cursor: pointer;
-  font-weight: 500;
-  transition: 0.2s;
+  @include button-base($color-white, $color-black);
 }
 
-/* 확인 버튼 (기본형 / 알림형) */
-.btn_ok {
-  background: linear-gradient(124deg, #6000b4, #006192);
-  color: #fcfcfc;
-  border: none;
-}
-
-/* 확인형 모달 */
 .type_confirm .btn_cancel {
-  border: 1px solid #212431;
-  background: #fff;
-  color: #212431;
+  border: 1px solid $color-black;
+  background: $color-white;
+  color: $color-black;
 }
+
 .type_confirm .btn_confirm {
-  background: #212431;
-  color: #fff;
+  background: $color-black;
+  color: $color-white;
   border: none;
 }
 
+// ----------------------------
+// ✨ 애니메이션
+// ----------------------------
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -117,7 +110,10 @@
   }
 }
 
-@media screen and (max-width: 430px) {
+// ----------------------------
+// 📱 모바일 대응
+// ----------------------------
+@include mobile {
   .modal_box {
     width: calc(100% - 40px);
   }

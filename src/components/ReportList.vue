@@ -78,7 +78,15 @@
               :class="{ open: report.isOpen }"
               @click="toggleExpand(index)"
             >
-              <img src="../assets/images/open_icon.png" alt="" />
+              <img
+                :src="
+                  report.isOpen
+                    ? '/src/assets/images/close_icon.png'
+                    : '/src/assets/images/open_icon.png'
+                "
+                :class="{ rotated: report.isOpen }"
+                alt="toggle icon"
+              />
             </div>
           </div>
           <div class="item_right">

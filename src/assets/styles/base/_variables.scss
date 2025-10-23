@@ -1,5 +1,5 @@
 // ----------------------------
-// 🎨 Color Palette
+// 🎨 Light Theme Colors (기본)
 // ----------------------------
 $color-white: #fff;
 $color-black: #212431;
@@ -14,6 +14,17 @@ $color-purple-main: #6000b4;
 $color-blue-main: #006192;
 $color-purple-light: #a450ff;
 $color-purple-text: #843aed;
+
+// ----------------------------
+// 🌙 Dark Theme Colors (감성 커스텀형)
+// ----------------------------
+$color-bg-dark: #0e0b17; // 전체 배경
+$color-card-dark: #1a132b; // 카드, 모달 배경
+$color-text-dark: #e8e5f2; // 기본 텍스트
+$color-subtext-dark: #a89cc8; // 보조 텍스트
+$color-border-dark: #2a2143; // 구분선
+$color-accent-dark: #8a4dff; // 주요 포인트 (보라)
+$color-accent2-dark: #0094b6; // 서브 포인트 (블루)
 
 // ----------------------------
 // 🧱 Layout
@@ -46,4 +57,9 @@ $gradient-main: linear-gradient(
   124deg,
   $color-purple-main 0%,
   $color-blue-main 100%
+);
+$gradient-dark: linear-gradient(
+  124deg,
+  $color-accent-dark 0%,
+  $color-accent2-dark 100%
 );
