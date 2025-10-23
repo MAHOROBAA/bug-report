@@ -17,6 +17,7 @@
   height: 76px;
   background: #fff;
   border-bottom: 1px solid #eff1f5;
+  z-index: 10;
 }
 
 h1 {
