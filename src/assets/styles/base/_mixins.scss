@@ -1,0 +1,50 @@
+// ----------------------------
+// 🎯 Flex Alignment
+// ----------------------------
+@mixin flex-center($direction: row) {
+  display: flex;
+  flex-direction: $direction;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin flex-between($direction: row) {
+  display: flex;
+  flex-direction: $direction;
+  align-items: center;
+  justify-content: space-between;
+}
+
+// ----------------------------
+// 🧱 Box Style
+// ----------------------------
+@mixin box($bg: $color-white, $radius: $border-radius-lg, $padding: 20px) {
+  background: $bg;
+  border-radius: $radius;
+  padding: $padding;
+}
+
+// ----------------------------
+// 🔘 Button
+// ----------------------------
+@mixin button-base($bg, $color: $color-white) {
+  @include flex-center();
+  height: 52px;
+  border-radius: $border-radius-sm;
+  font-size: $font-size-base;
+  font-weight: $font-weight-regular;
+  cursor: pointer;
+  transition: $transition-fast;
+  border: none;
+  background: $bg;
+  color: $color;
+}
+
+// ----------------------------
+// 📱 Responsive
+// ----------------------------
+@mixin mobile {
+  @media screen and (max-width: 430px) {
+    @content;
+  }
+}

@@ -1,0 +1,90 @@
+/* Pretendard Variable Dynamic Subset */
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css');
+
+html,
+body {
+  margin: 0 auto;
+  padding: 0;
+  width: 100%;
+  max-width: 1200px;
+  min-height: 100vh;
+  font-family: 'Pretendard Variable', Pretendard, -apple-system,
+    BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+  font-weight: 500;
+  font-size: 16px;
+  color: #212431;
+  background-color: #fff;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  box-sizing: border-box;
+}
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
+}
+
+p,
+span {
+  margin: 0;
+  padding: 0;
+}
+
+button {
+  padding: 0;
+  background-color: transparent;
+  border: none;
+}
+
+/* 앱 전체 레이아웃 */
+.app_wrap {
+  position: relative;
+  margin: 0 auto;
+  padding: 76px 20px 20px;
+}
+
+.main_content {
+  width: 100%;
+  max-width: 1200px;
+  margin: 50px 20px;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  gap: 30px;
+}
+
+.help_btn {
+  width: 36px;
+  height: 36px;
+  cursor: pointer;
+  position: absolute;
+  top: 84px;
+  right: 20px;
+}
+
+.help_btn svg {
+  width: 36px;
+  height: 36px;
+}
+
+/* 모바일 대응 */
+@media screen and (max-width: 430px) {
+  .app_wrap {
+    padding: 50px 20px 20px;
+  }
+  .main_content {
+    margin: 40px auto;
+    display: block;
+    position: relative;
+  }
+  .help_btn {
+    width: 24px;
+    height: 24px;
+    top: 60px;
+  }
+
+  .help_btn svg {
+    width: 24px;
+    height: 24px;
+  }
+}

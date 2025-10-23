@@ -1,0 +1,49 @@
+// ----------------------------
+// 🎨 Color Palette
+// ----------------------------
+$color-white: #fff;
+$color-black: #212431;
+$color-gray-100: #eff1f5;
+$color-gray-200: #f8f9fb;
+$color-gray-300: #f6f0fe;
+$color-gray-400: #f6f0ff;
+$color-gray-500: #bdc1cf;
+$color-gray-600: #6d7284;
+$color-gray-700: #b5b5b5;
+$color-purple-main: #6000b4;
+$color-blue-main: #006192;
+$color-purple-light: #a450ff;
+$color-purple-text: #843aed;
+
+// ----------------------------
+// 🧱 Layout
+// ----------------------------
+$max-width: 1200px;
+$border-radius-sm: 8px;
+$border-radius-lg: 20px;
+$gap-sm: 10px;
+$gap-md: 20px;
+
+// ----------------------------
+// ✨ Font
+// ----------------------------
+$font-family-base: 'Pretendard Variable', Pretendard, -apple-system,
+  BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+$font-size-base: 16px;
+$font-weight-regular: 500;
+$font-weight-bold: 700;
+$font-weight-extrabold: 800;
+
+// ----------------------------
+// ⚡ Transition & Animation
+// ----------------------------
+$transition-fast: 0.2s ease;
+
+// ----------------------------
+// 🌈 Gradients
+// ----------------------------
+$gradient-main: linear-gradient(
+  124deg,
+  $color-purple-main 0%,
+  $color-blue-main 100%
+);
