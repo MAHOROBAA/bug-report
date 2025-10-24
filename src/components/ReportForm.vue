@@ -1,38 +1,11 @@
 <template>
   <section class="report_form">
     <h2>리포트 작성</h2>
-    <div class="form_wrapper">
+    <form class="form_wrapper" @submit.prevent="submitReport">
       <div class="form_row">
         <div class="form_field">
           <label>카테고리</label>
-          <div class="custom_select" @click="toggleCategory">
-            <span>{{ selectedCategory || '선택하세요' }}</span>
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 20 20"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M14.747 7.62646L10 12.3735L5.25298 7.62646"
-                stroke="#A6ABBA"
-                stroke-width="1.2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              />
-            </svg>
-
-            <ul v-if="isOpen" class="select_list">
-              <li
-                v-for="(item, idx) in categories"
-                :key="idx"
-                @click="selectCategory(item)"
-              >
-                {{ item }}
-              </li>
-            </ul>
-          </div>
+          <CustomSelect v-model="selectedCategory" />
         </div>
         <div class="form_field">
           <label for="time">발생시각</label>
@@ -40,7 +13,7 @@
             id="time"
             type="text"
             v-model="timeInput"
-            placeholder="YYYY-MM-DD HH:MM"
+            :placeholder="nowPlaceholder"
             @input="formatTime"
             maxlength="16"
           />
@@ -50,40 +23,117 @@
         <label for="content">리포트</label>
         <textarea
           id="content"
+          v-model="contentInput"
           placeholder="리포트 내용을 입력하세요"
+          ref="textareaRef"
+          @input="autoResize"
         ></textarea>
       </div>
       <button
         class="submit_btn"
-        @click="modal.openModal('alert', '리포트가 기록되었어요.')"
-      >
+        :disabled="!isFormValid">
         기록
       </button>
-    </div>
+    </form>
   </section>
+    <!-- 모달 -->
+  <Modal
+    v-if="!!modal && modal.isOpen.value"
+    :type="modal.modalType.value"
+    :title="modal.modalTitle.value"
+    :message="modal.modalMessage.value"
+    @confirm="modal.confirm"
+    @cancel="modal.cancel"
+    @close="modal.closeModal"
+  />
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue'
+import { useModal } from '../composables/useModal.js'
+import { useRandomMessage } from '../composables/useRandomMessage.js'
+import { useReports } from '../composables/useReports.js'
+import Modal from '../components/Modal.vue'
+import CustomSelect from '../components/CustomSelect.vue'
 
-const categories = ['❓ 기억손실', '☣ 말바꾸기', '🤯 황당언행', '💫 인성확인'];
+const modal = useModal()
+const { getRandomMessage } = useRandomMessage()
+const { addReport } = useReports()
 
-const isOpen = ref(false);
-const selectedCategory = ref('');
-const timeInput = ref('');
+const selectedCategory = ref('')
+const timeInput = ref('')
+const contentInput = ref('')
+const textareaRef = ref(null)
 
-const toggleCategory = () => (isOpen.value = !isOpen.value);
-const selectCategory = (item) => {
-  selectedCategory.value = item;
-  isOpen.value = false;
-};
+const autoResize = () => {
+  const el = textareaRef.value
+  if (!el) return
 
+  el.style.height = 'auto'
+  const newHeight = Math.min(el.scrollHeight, 130)
+  el.style.height = `${newHeight}px`
+  el.style.overflowY = el.scrollHeight > 130 ? 'auto' : 'hidden'
+
+  // 패딩 조정: 내용 없으면 아래쪽 여백 줄이기
+  if (!el.value.trim()) {
+    el.style.padding = '10px 16px 0'
+  } else {
+    el.style.padding = '10px 16px'
+  }
+}
+
+// 현재 시각 placeholder용 computed
+const nowPlaceholder = computed(() => {
+  const now = new Date()
+  const y = now.getFullYear()
+  const m = String(now.getMonth() + 1).padStart(2, '0')
+  const d = String(now.getDate()).padStart(2, '0')
+  const h = String(now.getHours()).padStart(2, '0')
+  const min = String(now.getMinutes()).padStart(2, '0')
+  return `${y}-${m}-${d} ${h}:${min}`
+})
+
+// ✅ 폼 유효성 검사 (발생시각은 선택적)
+const isFormValid = computed(() => {
+  return selectedCategory.value && contentInput.value
+})
+
+// 발생 시각 자동 포맷
 const formatTime = () => {
-  let v = timeInput.value.replace(/\D/g, '');
-  if (v.length >= 5) v = v.replace(/(\d{4})(\d)/, '$1-$2');
-  if (v.length >= 8) v = v.replace(/(\d{4}-\d{2})(\d)/, '$1-$2');
-  if (v.length >= 11) v = v.replace(/(\d{4}-\d{2}-\d{2})(\d)/, '$1 $2');
-  if (v.length >= 14) v = v.replace(/(\d{4}-\d{2}-\d{2} \d{2})(\d)/, '$1:$2');
-  timeInput.value = v;
-};
+  let v = timeInput.value.replace(/\D/g, '')
+  if (v.length >= 5) v = v.replace(/(\d{4})(\d)/, '$1-$2')
+  if (v.length >= 8) v = v.replace(/(\d{4}-\d{2})(\d)/, '$1-$2')
+  if (v.length >= 11) v = v.replace(/(\d{4}-\d{2}-\d{2})(\d)/, '$1 $2')
+  if (v.length >= 14) v = v.replace(/(\d{4}-\d{2}-\d{2} \d{2})(\d)/, '$1:$2')
+  timeInput.value = v
+}
+
+// ✅ 리포트 등록 로직
+const submitReport = () => {
+  const now = new Date()
+  const registered = now.toISOString().slice(0, 16).replace('T', ' ')
+
+  // 발생시각이 비어 있으면 현재 시각으로 대체
+  const dateValue = timeInput.value || nowPlaceholder.value
+
+  const newReport = {
+    category: selectedCategory.value,
+    date: dateValue,
+    content: contentInput.value,
+    registered,
+    isOpen: false,
+    isEditing: false,
+    iconSrc: '/src/assets/images/open_icon.png'
+  }
+
+  addReport(newReport)
+
+  const message = getRandomMessage()
+  modal.openModal('alert', '리포트가 기록되었어요.', message)
+
+  // 폼 초기화
+  selectedCategory.value = ''
+  timeInput.value = ''
+  contentInput.value = ''
+}
 </script>

@@ -42,8 +42,32 @@
       </button>
     </div>
     <main class="main_content">
-      <ReportForm />
-      <ReportList />
+      <!-- 탭 버튼 (모바일 전용) -->
+      <div class="tab_wrapper" v-if="isMobile">
+        <button
+          :class="{ active: activeTab === 'form' }"
+          @click="activeTab = 'form'"
+        >
+          리포트 작성
+        </button>
+        <button
+          :class="{ active: activeTab === 'list' }"
+          @click="activeTab = 'list'"
+        >
+          리포트 내역
+        </button>
+      </div>
+
+      <!-- 탭 콘텐츠 -->
+      <div v-if="!isMobile" class="desktop_layout">
+        <ReportForm />
+        <ReportList />
+      </div>
+
+      <div v-else class="mobile_layout">
+        <ReportForm v-if="activeTab === 'form'" />
+        <ReportList v-else />
+      </div>
     </main>
     <Modal
       v-if="!!modal && modal.isOpen.value"
@@ -81,15 +105,27 @@
 </template>
 
 <script setup>
-import { useModal } from './composables/useModal.js';
+import { ref, onMounted, onBeforeUnmount } from 'vue'
+import Header from './components/Header.vue'
+import ReportForm from './components/ReportForm.vue'
+import ReportList from './components/ReportList.vue'
+import Modal from './components/Modal.vue'
+import { useModal } from './composables/useModal.js'
 import { useTheme } from './composables/useTheme.js';
-import Header from './components/Header.vue';
-import ReportForm from './components/ReportForm.vue';
-import ReportList from './components/ReportList.vue';
-import Modal from './components/Modal.vue';
 import moonIcon from './assets/images/night_icon.png';
 import starIcon from './assets/images/light_icon.png';
 
+const modal = useModal()
+const activeTab = ref('form')
+const isMobile = ref(false)
 const { theme, toggleTheme } = useTheme();
-const modal = useModal();
+
+const checkScreen = () => {
+  isMobile.value = window.innerWidth < 1024
+}
+onMounted(() => {
+  checkScreen()
+  window.addEventListener('resize', checkScreen)
+})
+onBeforeUnmount(() => window.removeEventListener('resize', checkScreen))
 </script>

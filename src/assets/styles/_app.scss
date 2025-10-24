@@ -1,3 +1,6 @@
+@use 'base/variables' as *;
+@use 'base/mixins' as *;
+
 /* Pretendard Variable Dynamic Subset */
 @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css');
 
@@ -76,15 +79,27 @@ button {
 }
 
 /* 모바일 대응 */
+@media screen and (max-width: 1024px) {
+  .main_content {
+    margin: 60px auto;
+    display: flex;
+    max-width: 700px;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    gap: 20px;
+  }
+
+  h2{
+    display: none;
+  }
+}
+
 @media screen and (max-width: 430px) {
   .app_wrap {
     padding: 50px 20px 20px;
   }
-  .main_content {
-    margin: 40px auto;
-    display: block;
-    position: relative;
-  }
+
   .btns_wrapper {
     top: 60px;
   }
@@ -98,5 +113,46 @@ button {
   .help_btn svg {
     width: 24px;
     height: 24px;
+  }
+}
+
+.desktop_layout {
+  width: 100%;
+  max-width: 1200px;
+  margin: 50px 20px;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  gap: 30px;
+}
+
+.tab_wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  border-radius: 20px 20px 0 0;
+  overflow: hidden;
+
+  button {
+    flex: 1;
+    padding: 8px 0;
+    font-size: 20px;
+    font-weight: 700;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    border-radius: 20px 20px 0 0;
+
+    &.active {
+      background: linear-gradient(90deg, #6000b4, #006192);
+      color: #F8F9FB;
+    }
+
+    &:not(.active) {
+      background: #BDC1CF;
+      color: #F8F9FB;
+      opacity: 0.8;
+    }
   }
 }
