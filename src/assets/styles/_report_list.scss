@@ -68,6 +68,10 @@ input {
   }
 }
 
+.edit_textarea {
+  padding: 0;
+}
+
 // ----------------------------
 // 🔘 Search Button
 // ----------------------------
@@ -152,7 +156,7 @@ input {
 
 .item_row {
   display: flex;
-  gap: $gap-md;
+  gap: $gap-sm;
 }
 
 .item_category,
@@ -185,68 +189,41 @@ input {
 }
 
 .item_icon {
-  width: 24px;
-  height: 24px;
+  display: inline-block;
 }
-.item_icon img {
+
+.icon_img {
   width: 24px;
   height: 24px;
-  transition: transform 0.8s ease, opacity 0.4s ease;
-  will-change: transform, opacity;
   display: block;
+  transition: transform 0.6s ease, opacity 0.4s ease;
+  will-change: transform, opacity;
 }
 
-/* 열릴 때: 정방향 회전 */
-.item_icon img.rotated {
-  animation: bounceRotateForward 0.8s ease;
+/* 회전 효과 */
+.item_icon .icon_img {
+  transform: rotate(0deg);
 }
 
-/* 닫힐 때: 역방향 회전 */
-.item_icon img.unrotated {
-  animation: bounceRotateBackward 0.8s ease;
+.item_icon.rotating .icon_img {
+  transform: rotate(360deg);
 }
 
-/* 부드러운 페이드 전환 */
-.fade-out {
-  opacity: 0;
-}
-
-.fade-in {
-  opacity: 1;
+/* 페이드 효과 */
+.fade-enter-active,
+.fade-leave-active {
   transition: opacity 0.4s ease;
 }
 
-/* 기존 회전 bounce 애니메이션 */
-@keyframes bounceRotateForward {
-  0% {
-    transform: rotate(0deg) scale(1);
-  }
-  50% {
-    transform: rotate(360deg) scale(1.4);
-  }
-  70% {
-    transform: rotate(360deg) scale(1.1);
-  }
-  100% {
-    transform: rotate(360deg) scale(1);
-  }
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 
-@keyframes bounceRotateBackward {
-  0% {
-    transform: rotate(0deg) scale(1);
-  }
-  50% {
-    transform: rotate(-360deg) scale(1.4);
-  }
-  70% {
-    transform: rotate(-360deg) scale(1.1);
-  }
-  100% {
-    transform: rotate(-360deg) scale(1);
-  }
+.fade-enter-to,
+.fade-leave-from {
+  opacity: 1;
 }
-
 .item_image {
   object-fit: contain;
 }

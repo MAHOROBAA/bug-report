@@ -41,20 +41,24 @@
     </div>
     <div class="line"></div>
     <!-- 빈 상태 -->
-    <p class="empty_text" v-if="!filteredReports.length">기록된 리포트가 없습니다.</p>
+    <p v-if="isLoading" class="empty_text">최근 리포트를 불러오는 중이에요{{ loadingDots }}</p>
+    <p v-else-if="!filteredReports.length" class="empty_text">기록된 리포트가 없습니다.</p>
 
     <!-- 리포트 목록 -->
     <div class="report_items" v-else>
-      <div v-for="(report, index) in filteredReports" :key="index" class="report_item">
+      <div v-for="(report, index) in filteredReports" :key="report.id" class="report_item">
         <!-- 요약 영역 -->
         <div class="item_inner">
           <div class="item_left">
-            <div
-              class="item_icon"
-              :class="{ open: report.isOpen }"
-              @click="toggleExpand(index)"
-            >
-              <img :src="report.iconSrc" alt="toggle icon" />
+            <div class="item_icon" :class="{ rotating: report.isRotating }" @click="toggleExpand(report.id)">
+              <transition name="fade" mode="out-in">
+                <img
+                  :key="report.isOpen"
+                  :src="report.isOpen ? closeIcon : openIcon"
+                  alt="toggle icon"
+                  class="icon_img"
+                />
+              </transition>
             </div>
           </div>
           <div class="item_right">
@@ -71,18 +75,18 @@
                 </div>
                 <div class="item_field">
                   <label>발생시각</label>
-                  <p v-if="!report.isEditing" class="item_date">{{ report.date }}</p>
+                  <p v-if="!report.isEditing" class="item_date">{{ report.occurredAt }}</p>
                   <input
                     v-else
                     type="text"
-                    v-model="report.date"
+                    v-model="report.occurredAt"
                     placeholder="YYYY-MM-DD HH:MM"
                     maxlength="16"
                   />
                 </div>
               </div>
               <p class="item_registered web">
-                등록일자 {{ report.registered }}
+                등록일자 {{ formatDate(report.createdAt) }}
               </p>
             </div>
             <!-- 펼침 영역 -->
@@ -105,7 +109,7 @@
                 <button class="btn_delete" @click="deleteReport(index)">삭제</button>
               </div>
             </div>
-            <p class="item_registered mob">등록일자 {{ report.registered }}</p>
+            <p class="item_registered mob">등록일자 {{ report.createdAt  }}</p>
           </div>
         </div>
       </div>
@@ -159,23 +163,56 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import CustomSelect from '../components/CustomSelect.vue'
 import Modal from '../components/Modal.vue'
 import { useModal } from '../composables/useModal.js'
 import { useReports } from '../composables/useReports.js'
 
+const openIcon = new URL('@/assets/images/open_icon.png', import.meta.url).href
+const closeIcon = new URL('@/assets/images/close_icon.png', import.meta.url).href
+
 const modal = useModal()
-const { reports, removeReport } = useReports()
+const { reports, isFetched, removeReport, updateReport } = useReports()
 
-// 커스텀 셀렉트
+// ----------------------------------------
+// 로딩 관련
+// ----------------------------------------
+const isLoading = ref(false)
+const loadingDots = ref('.')
+let loadingTimer = null
+let delayTimer = null
+
+watch(isFetched, (loaded) => {
+  if (!loaded) {
+    // Firestore 첫 응답 전: 약간의 지연 후 로딩 시작
+    delayTimer = setTimeout(() => {
+      isLoading.value = true
+      loadingTimer = setInterval(() => {
+        loadingDots.value =
+          loadingDots.value.length < 3 ? loadingDots.value + '.' : '.'
+      }, 500)
+    }, 600)
+  } else {
+    // Firestore 응답 도착 → 로딩 종료
+    clearTimeout(delayTimer)
+    isLoading.value = false
+    clearInterval(loadingTimer)
+  }
+})
+
+onBeforeUnmount(() => {
+  clearTimeout(delayTimer)
+  clearInterval(loadingTimer)
+})
+
+// ----------------------------------------
+// 검색 관련
+// ----------------------------------------
 const selectedCategory = ref('')
-
-// 검색 필드
 const searchDate = ref('')
 const searchKeyword = ref('')
 
-// 검색 버튼 활성화 조건
 const isSearchEnabled = computed(() => {
   return (
     selectedCategory.value ||
@@ -184,21 +221,22 @@ const isSearchEnabled = computed(() => {
   )
 })
 
-// 날짜 숫자만 받기
 const filterDateFormat = () => {
-  searchDate.value = searchDate.value.replace(/\D/g, '').slice(0, 8)
+  searchDate.value = searchDate.value.replace(/[^\d]/g, '').substring(0, 8)
 }
 
-// 검색 로직
 const filteredReports = computed(() => {
   return reports.value.filter((r) => {
     const matchCategory =
       !selectedCategory.value || r.category === selectedCategory.value
     const matchDate =
-      !searchDate.value || r.date.replace(/-/g, '').includes(searchDate.value)
+      !searchDate.value ||
+      (r.occurredAt &&
+        r.occurredAt.replace(/[-:\s]/g, '').includes(searchDate.value))
     const matchKeyword =
       !searchKeyword.value ||
-      r.content.toLowerCase().includes(searchKeyword.value.toLowerCase())
+      (r.content &&
+        r.content.toLowerCase().includes(searchKeyword.value.toLowerCase()))
     return matchCategory && matchDate && matchKeyword
   })
 })
@@ -211,61 +249,80 @@ const handleSearch = () => {
   })
 }
 
-// 펼침 아이콘 전환
-const toggleExpand = (index) => {
-  const report = reports.value[index]
-  const img = document.querySelectorAll('.item_icon img')[index]
-
-  report.isOpen = !report.isOpen
-
-  img.classList.remove('rotated', 'unrotated', 'fade')
-  void img.offsetWidth
-  img.classList.add(report.isOpen ? 'rotated' : 'unrotated')
-
-  img.classList.add('fade-out')
-  setTimeout(() => {
-    report.iconSrc = report.isOpen
-      ? '/src/assets/images/close_icon.png'
-      : '/src/assets/images/open_icon.png'
-    img.classList.remove('fade-out')
-    img.classList.add('fade-in')
-  }, 400)
-
-  setTimeout(() => {
-    img.classList.remove('fade-in')
-  }, 800)
+// ----------------------------------------
+// 리스트 조작 (열기/수정/삭제)
+// ----------------------------------------
+const toggleExpand = (id) => {
+  const target = reports.value.find((r) => r.id === id)
+  if (!target) return
+  target.isRotating = true
+  setTimeout(() => (target.isOpen = !target.isOpen), 300)
+  setTimeout(() => (target.isRotating = false), 600)
 }
 
-// 수정 기능
 const editReport = (index) => {
   reports.value[index].isEditing = true
 }
 
-const saveReport = (index) => {
-  reports.value[index].isEditing = false
-  modal.openModal('alert', '수정 완료', '수정이 완료되었습니다.')
+const saveReport = async (index) => {
+  const report = reports.value[index]
+  report.isEditing = false
+
+  try {
+    await updateReport(report.id, {
+      category: report.category,
+      occurredAt: report.occurredAt,
+      content: report.content,
+      createdAt: report.createdAt
+    })
+    modal.openModal('alert', '수정 완료', '수정이 완료되었습니다.')
+  } catch (e) {
+    console.error('수정 오류:', e)
+    modal.openModal('alert', '수정 실패', '업데이트 중 오류가 발생했습니다.')
+  }
 }
 
-// 삭제 기능
 const deleteReport = (index) => {
   const report = reports.value[index]
   modal.openModal('confirm', '리포트 삭제', '삭제하시겠어요?', {
-    onConfirm: () => {
-      reports.value.splice(index, 1)
-      modal.openModal('alert', '삭제 완료', '리포트가 삭제되었습니다.')
+    onConfirm: async () => {
+      try {
+        await removeReport(report.id)
+        await new Promise((r) => setTimeout(r, 300))
+        modal.openModal('alert', '삭제 완료', '리포트가 삭제되었습니다.')
+      } catch (e) {
+        console.error('삭제 중 오류:', e)
+        modal.openModal('alert', '삭제 실패', '삭제 중 오류가 발생했습니다.')
+      }
     }
   })
 }
+// ----------------------------------------
+// 날짜 포맷 변환용 헬퍼 함수 (Timestamp 대응)
+// ----------------------------------------
+const formatDate = (date) => {
+  if (!date) return '-'
+  try {
+    // Firestore Timestamp 객체인 경우
+    if (typeof date.toDate === 'function') {
+      return date.toDate().toLocaleString('ko-KR', { hour12: false })
+    }
+    // 문자열일 경우 그대로 반환
+    return date
+  } catch (e) {
+    console.error('날짜 변환 오류:', e)
+    return '-'
+  }
+}
 
-// TOP 버튼
+// ----------------------------------------
+// Top 버튼
+// ----------------------------------------
 const showTopBtn = ref(false)
 const handleScroll = () => {
   showTopBtn.value = window.scrollY > 300
 }
 onMounted(() => window.addEventListener('scroll', handleScroll))
 onBeforeUnmount(() => window.removeEventListener('scroll', handleScroll))
-
-const scrollToTop = () => {
-  window.scrollTo({ top: 0, behavior: 'smooth' })
-}
+const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' })
 </script>

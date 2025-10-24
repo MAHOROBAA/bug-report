@@ -109,31 +109,40 @@ const formatTime = () => {
 }
 
 // ✅ 리포트 등록 로직
-const submitReport = () => {
+const submitReport = async () => {
   const now = new Date()
+
+  // 등록일자 (ex: 2025-10-24 15:10)
   const registered = now.toISOString().slice(0, 16).replace('T', ' ')
 
   // 발생시각이 비어 있으면 현재 시각으로 대체
-  const dateValue = timeInput.value || nowPlaceholder.value
+  const dateValue =
+    timeInput.value || now.toISOString().slice(0, 16).replace('T', ' ')
 
+  // Firestore에 바로 문자열로 저장할 리포트 객체
   const newReport = {
     category: selectedCategory.value,
-    date: dateValue,
+    occurredAt: dateValue,
     content: contentInput.value,
-    registered,
+    createdAt: registered,
     isOpen: false,
     isEditing: false,
     iconSrc: '/src/assets/images/open_icon.png'
   }
 
-  addReport(newReport)
+  try {
+    await addReport(newReport) // ✅ Firestore 완료 후 모달 실행
+    const message = getRandomMessage()
+    modal.openModal('alert', '리포트가 기록되었어요.', message)
 
-  const message = getRandomMessage()
-  modal.openModal('alert', '리포트가 기록되었어요.', message)
-
-  // 폼 초기화
-  selectedCategory.value = ''
-  timeInput.value = ''
-  contentInput.value = ''
+    // 폼 초기화
+    selectedCategory.value = ''
+    timeInput.value = ''
+    contentInput.value = ''
+  } catch (e) {
+    console.error('리포트 등록 실패:', e)
+    modal.openModal('alert', '등록 실패', '저장 중 오류가 발생했습니다.')
+  }
 }
+
 </script>
