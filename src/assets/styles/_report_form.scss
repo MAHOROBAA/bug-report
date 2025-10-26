@@ -41,6 +41,25 @@ label {
   color: $color-gray-600;
 }
 
+.preview_item {
+  position: relative;
+}
+
+.preview_img {
+  width: 100%;
+}
+
+.remove_btn {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+}
+
+.remove_btn img {
+  width: 20px;
+  height: 20px;
+}
+
 // ----------------------------
 // ✏️ Input / Textarea
 // ----------------------------
@@ -96,7 +115,6 @@ textarea {
   }
 }
 
-
 // ----------------------------
 // 📱 Responsive
 // ----------------------------
@@ -108,5 +126,4 @@ textarea {
   .form_row {
     gap: $gap-sm;
   }
-
 }

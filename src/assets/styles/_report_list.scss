@@ -188,6 +188,63 @@ input {
   border-radius: $border-radius-sm;
 }
 
+.item_images {
+  margin-top: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+
+  .image_box {
+    width: 80px;
+    height: 80px;
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    transition: transform 0.2s;
+
+    &:hover {
+      transform: scale(1.05);
+    }
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+}
+
+.image_modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+
+  img {
+    max-width: 90%;
+    max-height: 80vh;
+    border-radius: 8px;
+  }
+
+  .close_btn {
+    position: absolute;
+    top: 24px;
+    right: 24px;
+    background: rgba(0, 0, 0, 0.6);
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    font-size: 20px;
+    cursor: pointer;
+  }
+}
+
 .item_icon {
   display: inline-block;
 }
@@ -291,7 +348,7 @@ input {
   }
 
   .line {
-    width: calc(100% - 30px);
+    width: 100%;
   }
 
   .report_items {
@@ -314,5 +371,4 @@ input {
   .web {
     display: none;
   }
-
 }
