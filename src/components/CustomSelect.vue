@@ -5,14 +5,6 @@
     </span>
 
     <ul v-if="isOpen" class="select_list">
-      <!-- showAll이 true일 때만 '전체' 항목 추가 -->
-      <li
-        v-if="showAll"
-        @click.stop="selectItem('')"
-        class="all_option"
-      >
-        전체
-      </li>
       <li
         v-for="(item, idx) in categories"
         :key="idx"
@@ -37,8 +29,7 @@ const categories = [
 
 // ✅ props & emit (v-model용)
 const props = defineProps({
-  modelValue: { type: String, default: '' },
-  showAll: { type: Boolean, default: false }
+  modelValue: { type: String, default: '' }
 })
 const emit = defineEmits(['update:modelValue'])
 

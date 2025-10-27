@@ -7,7 +7,7 @@
         <!-- 커스텀 셀렉트 -->
         <div class="form_field category_box">
           <label class="label_text">카테고리</label>
-          <CustomSelect v-model="selectedCategory" :showAll="true" />
+          <CustomSelect v-model="selectedCategory" />
         </div>
         <!-- 발생일 -->
         <div class="form_field">
