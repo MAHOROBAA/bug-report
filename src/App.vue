@@ -82,11 +82,11 @@
       <template #help>
         <div class="help_list">
           <p class="help_text">1. 자유롭게 등록/수정/삭제가 가능합니다.</p>
-          <p class="help_text">
+          <!-- <p class="help_text">
             2. 리포트 내용 영역에 이미지를 드래그/붙여넣기 할 수 있습니다.
-          </p>
-          <p class="help_text">3. 모든 리포트는 익명으로 작성됩니다.</p>
-          <p class="help_text">4. 카테고리 추가는 관리자에게 요청해 주세요.</p>
+          </p> -->
+          <p class="help_text">2. 모든 리포트는 익명으로 작성됩니다.</p>
+          <p class="help_text">3. 카테고리 추가는 관리자에게 요청해 주세요.</p>
         </div>
         <div class="line"></div>
         <div class="help_actions">
