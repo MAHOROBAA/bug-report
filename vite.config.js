@@ -1,6 +1,6 @@
-import { defineConfig } from 'vite'
-import vue from '@vitejs/plugin-vue'
-import path from 'path'
+import { defineConfig } from 'vite';
+import vue from '@vitejs/plugin-vue';
+import path from 'path';
 
 export default defineConfig({
   // GitHub Pages용 경로
@@ -10,7 +10,10 @@ export default defineConfig({
 
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src')
+      '@': path.resolve(__dirname, './src'),
+      '@components': path.resolve(__dirname, './src/components'),
+      '@pages': path.resolve(__dirname, './src/pages'),
+      '@composables': path.resolve(__dirname, './src/composables')
     }
   },
 
@@ -31,12 +34,12 @@ export default defineConfig({
       output: {
         assetFileNames: ({ name }) => {
           if (/\.(gif|jpe?g|png|svg)$/.test(name ?? '')) {
-            return 'assets/images/[name]-[hash][extname]'
+            return 'assets/images/[name]-[hash][extname]';
           }
           if (/\.css$/.test(name ?? '')) {
-            return 'assets/css/[name]-[hash][extname]'
+            return 'assets/css/[name]-[hash][extname]';
           }
-          return 'assets/[name]-[hash][extname]'
+          return 'assets/[name]-[hash][extname]';
         }
       }
     }
@@ -46,4 +49,4 @@ export default defineConfig({
     host: true,
     port: 5173
   }
-})
+});

@@ -1,0 +1,64 @@
+@use 'base/variables' as *;
+@use 'base/mixins' as *;
+
+.groupcreate_wrapper {
+  text-align: center;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  .title {
+    font-size: 20px;
+    font-weight: 900;
+    color: #535765;
+    margin-top: 150px;
+    margin-bottom: 50px;
+  }
+  .groupid_wrapper {
+    @include box($color-purple-50, $border-radius-lg, 20px);
+    display: flex;
+    flex-direction: column;
+    gap: $gap-md;
+    width: 100%;
+    max-width: 353px;
+    margin-bottom: 60px;
+  }
+  .groupid_wrapper p {
+    color: #535765;
+  }
+  input {
+    width: 100%;
+    height: 52px;
+    border: none;
+    border-radius: $border-radius-sm;
+    padding: 12px;
+    font-size: $font-size-base;
+    background: $color-white;
+    outline: none;
+    text-align: center;
+
+    &::placeholder {
+      color: $color-gray-300;
+    }
+  }
+  .form_field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .confirm_btn {
+    @include button-base($color-white, $color-black);
+    border: 1px solid $color-black;
+    background: $color-white;
+    color: $color-black;
+    padding: 0px 16px;
+  }
+
+  .back {
+    color: $color-gray-500;
+    text-decoration: underline;
+  }
+}

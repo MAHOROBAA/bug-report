@@ -4,7 +4,13 @@
       <h3 v-if="title" class="modal_title">{{ title }}</h3>
 
       <!-- 메시지 -->
-      <p v-if="message" class="modal_message">{{ message }}</p>
+      <p
+        v-if="message"
+        class="modal_message"
+        :class="{ notice_message: title === '공지사항' }"
+      >
+        {{ message }}
+      </p>
 
       <!-- 슬롯 (도움말 같은 커스텀 콘텐츠) -->
       <slot v-if="type === 'help'" name="help" />

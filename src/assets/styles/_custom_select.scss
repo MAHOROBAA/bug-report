@@ -17,11 +17,11 @@
 }
 
 .custom_select span {
-  color: $color-gray-500;
+  color: $color-gray-300;
   transition: color 0.2s ease;
 
   &.placeholder {
-    color: $color-gray-500;
+    color: $color-gray-300;
   }
 
   &:not(.placeholder) {
@@ -48,7 +48,7 @@
     text-align: center;
 
     &:hover {
-      background: $color-gray-400;
+      background: $color-gray-50;
     }
   }
 }

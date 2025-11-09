@@ -1,7 +1,6 @@
 @use 'base/variables' as *;
 @use 'base/mixins' as *;
 
-
 .header {
   position: fixed;
   top: 0;
@@ -11,16 +10,38 @@
   justify-content: center;
   align-items: center;
   width: 100%;
+  max-width: 1200px;
   height: 76px;
   background: #fff;
   border-bottom: 1px solid #eff1f5;
   z-index: 10;
+  margin: 0 auto;
 }
 
 h1 {
   font-weight: 800;
   color: #535764;
   font-size: 20px;
+}
+
+.icon_btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+
+  &.left {
+    left: 20px;
+  }
+  &.right {
+    right: 20px;
+  }
+
+  svg {
+    display: block;
+  }
 }
 
 @media (max-width: 430px) {

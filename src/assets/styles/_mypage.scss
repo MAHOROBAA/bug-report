@@ -1,0 +1,78 @@
+@use 'base/variables' as *;
+@use 'base/mixins' as *;
+
+.menu_wrapper {
+  display: flex;
+  flex-direction: column;
+  margin-top: 76px;
+}
+
+.menu_inner {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px;
+}
+
+.left {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  align-items: center;
+}
+
+.menutitle {
+  font-size: 16px;
+}
+
+.arrow_icon {
+  transform: rotate(90deg);
+  transition: transform 0.25s ease;
+}
+
+.arrow_icon.rotated {
+  transform: rotate(270deg);
+}
+
+/* ---- submenu 트랜지션 ---- */
+.submenu_wrapper {
+  overflow: hidden;
+  background: #fafafa;
+}
+
+/* 트랜지션 이름 submenu와 일치 */
+.submenu-enter-active,
+.submenu-leave-active {
+  transition: all 0.3s ease;
+}
+.submenu-enter-from,
+.submenu-leave-to {
+  max-height: 0;
+  opacity: 0;
+}
+.submenu-enter-to,
+.submenu-leave-from {
+  max-height: 98px; /* 충분히 큰 값으로 설정 */
+  opacity: 1;
+}
+.submenu_inner {
+  padding: 14px 20px 14px 52px;
+  background-color: #f8f9fb;
+}
+
+.submenu_inner:hover {
+  background: $color-purple-50;
+}
+
+.submenutitle {
+  font-size: 14px;
+  color: #848a9c;
+  line-height: 1.5;
+}
+
+@media (max-width: 430px) {
+  .menu_wrapper {
+    margin-top: 52px;
+  }
+}

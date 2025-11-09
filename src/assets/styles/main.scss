@@ -1,13 +1,16 @@
-@use "base/variables" as *;
-@use "base/mixins" as *;
+@use 'base/variables' as *;
+@use 'base/mixins' as *;
 // 전역 기본 세팅
 
-@use "app" as *;
-@use "custom_select" as *;
-@use "header" as *;
-@use "modal" as *;
-@use "report_form" as *;
-@use "report_list" as *;
+@use 'app' as *;
+@use 'custom_select' as *;
+@use 'header' as *;
+@use 'modal' as *;
+@use 'report_form' as *;
+@use 'report_list' as *;
+@use 'mypage' as *;
+@use 'groupjoin' as *;
+@use 'groupcreate' as *;
 // 개별 SCSS 모듈
 
 // ==================================================
@@ -25,7 +28,7 @@
   --color-bg: #{$color-white};
   --color-text: #{$color-black};
   --color-border: #{$color-gray-100};
-  --color-surface: #{$color-gray-300};
+  --color-surface: #{$color-gray-100};
   --color-subtext: #{$color-gray-600};
   --color-accent-main: #{$color-purple-main};
   --color-accent-sub: #{$color-blue-main};
@@ -80,14 +83,18 @@ body {
   }
 
   .form_wrapper {
-    background: #5C4670;
+    background: #5c4670;
   }
 
-  label, .custom_select span, .item_category, .item_date {
+  label,
+  .custom_select span,
+  .item_category,
+  .item_date {
     color: var(--color-text);
   }
 
-  .report_item, .item_contents {
+  .report_item,
+  .item_contents {
     background: #395973;
   }
 

@@ -37,6 +37,7 @@ button {
   padding: 0;
   background-color: transparent;
   border: none;
+  font-family: 'Pretendard Variable';
 }
 
 /* 앱 전체 레이아웃 */
@@ -60,20 +61,30 @@ button {
   position: absolute;
   top: 84px;
   right: 20px;
+  width: calc(100% - 40px);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.btns_inner {
   display: flex;
   flex-direction: row;
   gap: 10px;
 }
 
 .theme_toggle_btn,
-.help_btn {
+.help_btn,
+.noti_btn {
   width: 36px;
   height: 36px;
   cursor: pointer;
 }
 
 .theme_toggle_btn img,
-.help_btn svg {
+.help_btn svg,
+.noti_btn img {
   width: 36px;
   height: 36px;
 }
@@ -90,7 +101,7 @@ button {
     gap: 20px;
   }
 
-  h2{
+  h2 {
     display: none;
   }
 }
@@ -104,13 +115,15 @@ button {
     top: 60px;
   }
   .theme_toggle_btn,
-  .help_btn {
+  .help_btn,
+  .noti_btn {
     width: 24px;
     height: 24px;
   }
 
   .theme_toggle_btn img,
-  .help_btn svg {
+  .help_btn svg,
+  .noti_btn img {
     width: 24px;
     height: 24px;
   }
@@ -146,12 +159,12 @@ button {
 
     &.active {
       background: linear-gradient(90deg, #6000b4, #006192);
-      color: #F8F9FB;
+      color: #f8f9fb;
     }
 
     &:not(.active) {
-      background: #BDC1CF;
-      color: #F8F9FB;
+      background: #bdc1cf;
+      color: #f8f9fb;
       opacity: 0.8;
     }
   }

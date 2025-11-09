@@ -13,7 +13,7 @@ import {
   serverTimestamp
 } from 'firebase/firestore';
 import { db } from '@/firebase/firebaseInit';
-
+console.log('db 확인:', db);
 // -------------------------------------------------------------
 // 상태
 // -------------------------------------------------------------
@@ -78,7 +78,8 @@ const addReport = async (report) => {
   try {
     const docRef = await addDoc(reportsCollection, {
       ...report,
-      createdAt: serverTimestamp()
+      createdAt: serverTimestamp(),
+      reactions: { '😤': 0, '😩': 0, '😐': 0, '🙂': 0, '😅': 0 }
     });
     console.log('리포트 추가 성공:', docRef.id);
     return docRef.id; // ✅ 추가됨: 정상 종료 신호
