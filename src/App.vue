@@ -1,4 +1,4 @@
-<!-- <template>
+<template>
   <transition :name="transitionName" mode="out-in">
     <router-view />
   </transition>
@@ -61,11 +61,4 @@ watch(
 .slide-right-leave-to {
   transform: translateX(100%);
 }
-</style> -->
-<template>
-  <div style="padding:40px; font-size:20px; color:#000;">
-    here is app
-  </div>
-</template>
-
-<script setup></script>
+</style>
