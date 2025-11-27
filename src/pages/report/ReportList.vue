@@ -419,8 +419,8 @@ const filterDateFormat = () => {
   searchDate.value = searchDate.value.replace(/[^\d]/g, '').substring(0, 8);
 };
 
-const filteredReports = computed(() =>
-  reports.value.filter((r) => {
+const filteredReports = computed(() => {
+  const list = reports.value.filter((r) => {
     const matchCategory =
       !selectedCategory.value || r.category === selectedCategory.value;
     const matchDate =
@@ -432,8 +432,27 @@ const filteredReports = computed(() =>
       (r.content &&
         r.content.toLowerCase().includes(searchKeyword.value.toLowerCase()));
     return matchCategory && matchDate && matchKeyword;
-  })
-);
+  });
+
+  // 작성 시각(createdAt) 기준 내림차순 정렬
+  return list.sort((a, b) => {
+    const getTime = (val) => {
+      if (!val) return 0;
+
+      // Timestamp 타입일 때
+      if (typeof val.toDate === 'function') {
+        return val.toDate().getTime();
+      }
+
+      // 문자열일 때 (예: '2025-10-24 17:31')
+      const t = new Date(val).getTime();
+      return Number.isNaN(t) ? 0 : t;
+    };
+
+    return getTime(b.createdAt) - getTime(a.createdAt);
+  });
+});
+
 
 const handleSearch = () => {
   console.log('검색 실행:', {
@@ -463,8 +482,8 @@ const saveReport = async (index) => {
     await updateReport(report.id, {
       category: report.category,
       occurredAt: report.occurredAt,
-      content: report.content,
-      createdAt: report.createdAt
+      content: report.content
+      // createdAt 은 수정하지 않는다
     });
     modal.openModal('alert', '수정 완료', '수정이 완료되었습니다.');
   } catch (e) {
@@ -472,6 +491,7 @@ const saveReport = async (index) => {
     modal.openModal('alert', '수정 실패', '업데이트 중 오류가 발생했습니다.');
   }
 };
+
 
 const deleteReport = (index) => {
   const report = reports.value[index];

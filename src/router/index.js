@@ -16,7 +16,13 @@ const router = createRouter({
     { path: '/signup', component: Signup },
     { path: '/report', component: Report },
     { path: '/mypage', component: Mypage },
-    { path: '/signup/terms', component: TermsModal },
+    { path: '/signup/terms',
+      component: TermsModal,
+      props: {
+        showAgree: true,
+        useRouterClose: true
+      }
+    },
     { path: '/signup/groupjoin', component: GroupJoin },
     { path: '/signup/groupcreate', component: GroupCreate }
   ]

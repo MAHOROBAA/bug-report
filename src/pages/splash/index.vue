@@ -48,6 +48,18 @@
     </div>
   </div>
 </template>
+<script setup>
+import { onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+
+onMounted(() => {
+  setTimeout(() => {
+    router.replace('/signup')
+  }, 3000)
+})
+</script>
 <style scoped>
 .logo_wrapper {
   width: 100%;
@@ -56,6 +68,7 @@
   align-items: center;
   justify-content: center;
 }
+
 .logo {
   display: flex;
   flex-direction: column;
@@ -64,6 +77,7 @@
   justify-content: center;
   margin-left: -10px;
 }
+
 .logo p {
   font-size: 20px;
   font-weight: 900;

@@ -1,5 +1,5 @@
 // src/composables/useReports.js
-import { ref, onUnmounted } from 'vue';
+import { ref, onUnmounted, watch } from 'vue';
 import {
   collection,
   addDoc,
@@ -10,82 +10,112 @@ import {
   query,
   orderBy,
   limit,
-  serverTimestamp
+  serverTimestamp,
+  where
 } from 'firebase/firestore';
 import { db } from '@/firebase/firebaseInit';
-console.log('db 확인:', db);
+import { useGroups } from '@/composables/useGroups.js';
+
 // -------------------------------------------------------------
 // 상태
 // -------------------------------------------------------------
-const reports = ref([]); // 리포트 목록
-const isFetched = ref(false); // 첫 데이터 수신 여부 (로딩 제어용)
+const reports = ref([]);
+const isFetched = ref(false);
+
+// 그룹 ID 가져오기
+const { currentGroupId } = useGroups();
+
+// 구독 저장용
+let unsubscribe = null;
 
 // -------------------------------------------------------------
-// Firestore 컬렉션 참조 + 쿼리 정의
+// 리포트 구독 함수 (그룹 기준)
 // -------------------------------------------------------------
-const reportsCollection = collection(db, 'reports');
-const q = query(reportsCollection, orderBy('createdAt', 'desc'), limit(20));
+const subscribeReports = (groupId) => {
+  if (!groupId) return;
 
-// -------------------------------------------------------------
-// 실시간 구독 (최초 로딩 타이밍 문제 해결 포함)
-// -------------------------------------------------------------
-const unsubscribe = onSnapshot(
-  q,
-  { includeMetadataChanges: true },
-  (snapshot) => {
-    const docs = snapshot.docs.map((d) => {
-      const data = d.data();
+  // 기존 구독 해제
+  if (unsubscribe) {
+    unsubscribe();
+    unsubscribe = null;
+  }
 
-      // createdAt이 Timestamp라면 문자열로 변환
-      let createdAt = data.createdAt;
-      if (createdAt && createdAt.seconds) {
-        const date = new Date(createdAt.seconds * 1000);
-        const y = date.getFullYear();
-        const m = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        const h = String(date.getHours()).padStart(2, '0');
-        const min = String(date.getMinutes()).padStart(2, '0');
-        createdAt = `${y}-${m}-${day} ${h}:${min}`;
+  const reportsCollection = collection(db, 'reports');
+
+  const q = query(
+    reportsCollection,
+    where('groupId', '==', groupId),  // ✅ 핵심
+    orderBy('createdAt', 'desc'),
+    limit(20)
+  );
+
+  unsubscribe = onSnapshot(
+    q,
+    { includeMetadataChanges: true },
+    (snapshot) => {
+      const docs = snapshot.docs.map((d) => {
+        const data = d.data();
+
+        let createdAt = data.createdAt;
+        if (createdAt && createdAt.seconds) {
+          const date = new Date(createdAt.seconds * 1000);
+          const y = date.getFullYear();
+          const m = String(date.getMonth() + 1).padStart(2, '0');
+          const day = String(date.getDate()).padStart(2, '0');
+          const h = String(date.getHours()).padStart(2, '0');
+          const min = String(date.getMinutes()).padStart(2, '0');
+          createdAt = `${y}-${m}-${day} ${h}:${min}`;
+        }
+
+        return {
+          id: d.id,
+          ...data,
+          images: data.images || [],
+          createdAt
+        };
+      });
+
+      reports.value = docs;
+
+      if (!isFetched.value && docs.length > 0) {
+        isFetched.value = true;
       }
 
-      return {
-        id: d.id,
-        ...data,
-        images: data.images || [],
-        createdAt // 변환된 문자열 저장
-      };
-    });
-
-    reports.value = docs;
-
-    if (!isFetched.value && docs.length > 0) {
-      isFetched.value = true;
+      console.log('✅ 그룹 기반 Firestore 데이터:', reports.value);
+    },
+    (error) => {
+      console.error('Firestore 구독 오류:', error);
     }
+  );
+};
 
-    console.log('Firestore 데이터:', reports.value);
-  },
-  (error) => {
-    console.error('Firestore 구독 오류:', error);
+// -------------------------------------------------------------
+// groupId 변경 시 자동 재구독
+// -------------------------------------------------------------
+watch(currentGroupId, (newGroupId) => {
+  if (newGroupId) {
+    subscribeReports(newGroupId);
   }
-);
+});
 
 // -------------------------------------------------------------
 // Firestore CRUD
 // -------------------------------------------------------------
-
-// 추가
 const addReport = async (report) => {
   try {
+    const reportsCollection = collection(db, 'reports');
+
     const docRef = await addDoc(reportsCollection, {
       ...report,
       createdAt: serverTimestamp(),
       reactions: { '😤': 0, '😩': 0, '😐': 0, '🙂': 0, '😅': 0 }
     });
+
     console.log('리포트 추가 성공:', docRef.id);
-    return docRef.id; // ✅ 추가됨: 정상 종료 신호
+    return docRef.id;
   } catch (err) {
     console.error('리포트 추가 실패:', err);
-    throw err; // ✅ catch에서 다시 던져야 ReportForm에서 catch로 감
+    throw err;
   }
 };
 
@@ -114,7 +144,9 @@ const removeReport = async (reportId) => {
 // -------------------------------------------------------------
 // 구독 종료 처리
 // -------------------------------------------------------------
-onUnmounted(() => unsubscribe());
+onUnmounted(() => {
+  if (unsubscribe) unsubscribe();
+});
 
 // -------------------------------------------------------------
 // export
@@ -122,10 +154,9 @@ onUnmounted(() => unsubscribe());
 export function useReports() {
   return {
     reports,
-    isFetched, // Firestore 로딩 완료 여부
+    isFetched,
     addReport,
     updateReport,
-    removeReport,
-    unsubscribe
+    removeReport
   };
 }

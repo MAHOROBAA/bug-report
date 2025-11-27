@@ -6,6 +6,7 @@ import {
   persistentMultipleTabManager
 } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
+import { getAuth, GoogleAuthProvider } from 'firebase/auth';
 
 // Firebase 설정 (환경 변수 기반)
 const firebaseConfig = {
@@ -30,4 +31,13 @@ const db = initializeFirestore(app, {
 
 const storage = getStorage(app);
 
-export { db, storage };
+// Auth 초기화
+const auth = getAuth(app);
+const googleProvider = new GoogleAuthProvider();
+
+// 필요 시 계정 선택 강제
+googleProvider.setCustomParameters({
+  prompt: 'select_account'
+});
+
+export { db, storage, auth, googleProvider };

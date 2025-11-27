@@ -2,7 +2,7 @@
   <div class="terms_modal">
     <Header
       title="서비스 이용 약관"
-      leftIcon="close"
+      :leftIcon="showAgree ? '' : 'close'"
       @left-action="closeTerms"
     />
     <div class="terms_wrapper" :class="{ nofooter: !showAgree }">
@@ -87,22 +87,77 @@
       <div v-if="showAgree" class="termagree_wrapper">
         <p class="terminfo">약관을 읽고 동의 하신다면 다음을 눌러 주세요.</p>
         <div class="modal_buttons type_confirm">
-          <button class="btn_cancel">뒤로</button>
-          <button class="btn_confirm">다음</button>
+          <button class="btn_cancel" @click="handleCancel">뒤로</button>
+          <button class="btn_confirm" @click="handleAgree">다음</button>
         </div>
       </div>
     </div>
   </div>
 </template>
 <script setup>
+import { onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 import Header from '@/components/Header.vue';
+import { useAuth } from '@/composables/useAuth';
+import { useGroups } from '@/composables/useGroups';
 
-// 마이페이지에서 열릴 땐 ‘닫기 모드’로 동작하게 함
 const props = defineProps({
-  showAgree: { type: Boolean, default: true } // 기본은 약관 동의용 모달
+  // 마이페이지에서 볼 때는 false로 내려서 하단 버튼 숨김
+  showAgree: { type: Boolean, default: true },
+  // 라우터(/signup/terms)로 띄울 때는 true로 켜서 닫기 시 router 이동
+  useRouterClose: { type: Boolean, default: false }
 });
+
 const emit = defineEmits(['close-terms']);
-const closeTerms = () => emit('close-terms');
+
+const router = useRouter();
+const { isLoggedIn, loginWithGoogle } = useAuth();
+const { currentGroupId, loadUserGroup } = useGroups();
+
+const closeTerms = () => {
+  if (props.useRouterClose) {
+    // 회원가입 플로우에서 쓰일 때
+    router.push('/signup');
+  } else {
+    // 마이페이지 등에서 모달로 쓸 때
+    emit('close-terms');
+  }
+};
+
+const handleCancel = () => {
+  closeTerms();
+};
+
+const goNextAfterLogin = async () => {
+  await loadUserGroup();
+
+  if (currentGroupId.value) {
+    router.push('/report');
+  } else {
+    router.push('/signup/groupjoin');
+  }
+};
+
+const handleAgree = async () => {
+  try {
+    // 아직 로그인 안 되어 있으면 여기서 구글 로그인
+    if (!isLoggedIn.value) {
+      await loginWithGoogle();
+    }
+
+    await goNextAfterLogin();
+  } catch (error) {
+    console.error('login error in TermsModal:', error);
+    window.alert('로그인에 실패했어요. 잠시 후 다시 시도해 주세요.');
+  }
+};
+
+onMounted(async () => {
+  // 라우터 모드에서 이미 로그인 상태로 들어오면 바로 다음 단계로 넘겨도 됨
+  if (props.useRouterClose && isLoggedIn.value) {
+    await goNextAfterLogin();
+  }
+});
 </script>
 <style scoped>
 .terms_wrapper {
@@ -111,9 +166,9 @@ const closeTerms = () => emit('close-terms');
   overflow-y: auto;
   margin-top: 76px;
   padding-bottom: 121px;
-  &.nofooter {
-    padding-bottom: 0px;
-  }
+}
+.nofooter {
+  padding-bottom: 0px;
 }
 
 .terms_inner {
@@ -148,7 +203,7 @@ const closeTerms = () => emit('close-terms');
 .terminfo {
   font-size: 14px;
   line-height: 1.6;
-  color: $color-gray-800;
+  color: #393d48;
 }
 
 @media (max-width: 430px) {

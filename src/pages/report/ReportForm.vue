@@ -46,23 +46,38 @@
     @close="modal.closeModal"
   />
 </template>
-
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useModal } from '../../composables/useModal.js';
 import { useRandomMessage } from '../../composables/useRandomMessage.js';
 import { useReports } from '../../composables/useReports.js';
+import { useGroups } from '../../composables/useGroups.js';
 import Modal from '../../components/Modal.vue';
 import CustomSelect from '../../components/CustomSelect.vue';
 
 const modal = useModal();
 const { getRandomMessage } = useRandomMessage();
 const { addReport } = useReports();
+const { currentGroupId, loadUserGroup } = useGroups();
 
 const selectedCategory = ref('');
 const timeInput = ref('');
 const contentInput = ref('');
 const textareaRef = ref(null);
+
+// 화면 들어올 때 현재 유저의 groupId 로드
+onMounted(async () => {
+  await loadUserGroup();
+
+  if (!currentGroupId.value) {
+    // 그룹이 없으면 리포트 작성 의미가 없으니까 안내만
+    modal.openModal(
+      'alert',
+      '그룹 정보가 없어요.',
+      '그룹 ID가 설정되지 않았어요. 다시 로그인하거나 그룹을 확인해 주세요.'
+    );
+  }
+});
 
 const autoResize = () => {
   const el = textareaRef.value;
@@ -73,7 +88,6 @@ const autoResize = () => {
   el.style.height = `${newHeight}px`;
   el.style.overflowY = el.scrollHeight > 130 ? 'auto' : 'hidden';
 
-  // 패딩 조정: 내용 없으면 아래쪽 여백 줄이기
   if (!el.value.trim()) {
     el.style.padding = '10px 16px 0';
   } else {
@@ -109,6 +123,16 @@ const formatTime = () => {
 
 // ✅ 리포트 등록 로직
 const submitReport = async () => {
+  // 혹시라도 groupId가 없는 상태라면 막아주기
+  if (!currentGroupId.value) {
+    modal.openModal(
+      'alert',
+      '그룹이 설정되지 않았어요.',
+      '그룹 ID가 없는 상태에서는 리포트를 기록할 수 없어요.'
+    );
+    return;
+  }
+
   const now = new Date();
 
   // 등록일자 (ex: 2025-10-24 15:10)
@@ -118,8 +142,9 @@ const submitReport = async () => {
   const dateValue =
     timeInput.value || now.toISOString().slice(0, 16).replace('T', ' ');
 
-  // Firestore에 바로 문자열로 저장할 리포트 객체
+  // Firestore에 저장할 리포트 객체
   const newReport = {
+    groupId: currentGroupId.value, // ✅ 그룹 기준으로 묶는 핵심 필드
     category: selectedCategory.value,
     occurredAt: dateValue,
     content: contentInput.value,
@@ -130,7 +155,7 @@ const submitReport = async () => {
   };
 
   try {
-    await addReport(newReport); // ✅ Firestore 완료 후 모달 실행
+    await addReport(newReport);
     const message = getRandomMessage();
     modal.openModal('alert', '리포트가 기록되었어요.', message);
 
