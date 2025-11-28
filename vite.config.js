@@ -4,7 +4,7 @@ import path from 'path';
 
 export default defineConfig({
   // GitHub Pages용 경로
-  base: '/bug_report_develop/',
+  base: '/',
 
   plugins: [vue()],
 
