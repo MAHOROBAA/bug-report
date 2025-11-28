@@ -27,7 +27,7 @@ export default defineConfig({
   },
 
   build: {
-    outDir: 'dist',
+    outDir: 'docs',
     assetsDir: 'assets',
     manifest: true, // CSS 캐시 꼬임 방지
     rollupOptions: {
