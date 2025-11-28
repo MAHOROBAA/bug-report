@@ -34,50 +34,26 @@
       <button class="submit_btn" :disabled="!isFormValid">기록</button>
     </form>
   </section>
-
-  <!-- 모달 -->
-  <Modal
-    v-if="!!modal && modal.isOpen.value"
-    :type="modal.modalType.value"
-    :title="modal.modalTitle.value"
-    :message="modal.modalMessage.value"
-    @confirm="modal.confirm"
-    @cancel="modal.cancel"
-    @close="modal.closeModal"
-  />
 </template>
+
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed } from 'vue';
 import { useModal } from '../../composables/useModal.js';
 import { useRandomMessage } from '../../composables/useRandomMessage.js';
 import { useReports } from '../../composables/useReports.js';
 import { useGroups } from '../../composables/useGroups.js';
-import Modal from '../../components/Modal.vue';
 import CustomSelect from '../../components/CustomSelect.vue';
 
-const modal = useModal();
+// 전역 모달 composable (Modal 컴포넌트는 /report/index.vue에서만 렌더링)
+const { openModal } = useModal();
 const { getRandomMessage } = useRandomMessage();
 const { addReport } = useReports();
-const { currentGroupId, loadUserGroup } = useGroups();
+const { currentGroupId } = useGroups();
 
 const selectedCategory = ref('');
 const timeInput = ref('');
 const contentInput = ref('');
 const textareaRef = ref(null);
-
-// 화면 들어올 때 현재 유저의 groupId 로드
-onMounted(async () => {
-  await loadUserGroup();
-
-  if (!currentGroupId.value) {
-    // 그룹이 없으면 리포트 작성 의미가 없으니까 안내만
-    modal.openModal(
-      'alert',
-      '그룹 정보가 없어요.',
-      '그룹 ID가 설정되지 않았어요. 다시 로그인하거나 그룹을 확인해 주세요.'
-    );
-  }
-});
 
 const autoResize = () => {
   const el = textareaRef.value;
@@ -106,7 +82,7 @@ const nowPlaceholder = computed(() => {
   return `${y}-${m}-${d} ${h}:${min}`;
 });
 
-// ✅ 폼 유효성 검사 (발생시각은 선택적)
+// 폼 유효성 검사 (발생시각은 선택적)
 const isFormValid = computed(() => {
   return selectedCategory.value && contentInput.value;
 });
@@ -121,11 +97,11 @@ const formatTime = () => {
   timeInput.value = v;
 };
 
-// ✅ 리포트 등록 로직
+// 리포트 등록 로직
 const submitReport = async () => {
-  // 혹시라도 groupId가 없는 상태라면 막아주기
+  // 혹시라도 groupId가 없는 상태라면 막아주기 (이 경우는 거의 없을 예정)
   if (!currentGroupId.value) {
-    modal.openModal(
+    openModal(
       'alert',
       '그룹이 설정되지 않았어요.',
       '그룹 ID가 없는 상태에서는 리포트를 기록할 수 없어요.'
@@ -144,7 +120,7 @@ const submitReport = async () => {
 
   // Firestore에 저장할 리포트 객체
   const newReport = {
-    groupId: currentGroupId.value, // ✅ 그룹 기준으로 묶는 핵심 필드
+    groupId: currentGroupId.value, // 그룹 기준으로 묶는 핵심 필드
     category: selectedCategory.value,
     occurredAt: dateValue,
     content: contentInput.value,
@@ -157,7 +133,7 @@ const submitReport = async () => {
   try {
     await addReport(newReport);
     const message = getRandomMessage();
-    modal.openModal('alert', '리포트가 기록되었어요.', message);
+    openModal('alert', '리포트가 기록되었어요.', message);
 
     // 폼 초기화
     selectedCategory.value = '';
@@ -165,7 +141,7 @@ const submitReport = async () => {
     contentInput.value = '';
   } catch (e) {
     console.error('리포트 등록 실패:', e);
-    modal.openModal('alert', '등록 실패', '저장 중 오류가 발생했습니다.');
+    openModal('alert', '등록 실패', '저장 중 오류가 발생했습니다.');
   }
 };
 </script>

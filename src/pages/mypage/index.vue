@@ -7,12 +7,14 @@
       @left-action="emitClose"
     />
     <div class="menu_wrapper">
+      <!-- 내 정보 -->
       <div
         class="menu_inner"
         :class="{ open: activeMenu === 'info' }"
         @click="toggleMenu('info')"
       >
         <div class="left">
+          <!-- 아이콘 그대로 유지 -->
           <svg
             width="24"
             height="24"
@@ -65,16 +67,23 @@
           </svg>
         </div>
       </div>
+
+      <!-- 내 정보 서브메뉴 -->
       <transition name="submenu">
         <div v-show="activeMenu === 'info'" class="submenu_wrapper">
-          <div class="submenu_inner">
+          <div class="submenu_inner" @click.stop="handleCheckGroupId">
             <p class="submenutitle">그룹 ID 확인</p>
           </div>
-          <div class="submenu_inner">
+          <div class="submenu_inner" @click.stop="handleShareLink">
             <p class="submenutitle">링크 공유하기</p>
+          </div>
+          <div class="submenu_inner" @click.stop="openChangeGroupModal">
+            <p class="submenutitle">그룹 ID 수정</p>
           </div>
         </div>
       </transition>
+
+      <!-- 이용약관 -->
       <div class="menu_inner" @click="openTerms">
         <div class="left">
           <svg
@@ -140,7 +149,9 @@
           </svg>
         </div>
       </div>
-      <div class="menu_inner">
+
+      <!-- 로그아웃 -->
+      <div class="menu_inner" @click="handleLogout">
         <div class="left">
           <svg
             width="24"
@@ -200,6 +211,8 @@
       </div>
     </div>
   </div>
+
+  <!-- 이용약관 모달 -->
   <transition name="fade">
     <TermsModal
       v-if="isTermsOpen"
@@ -207,23 +220,248 @@
       @close-terms="isTermsOpen = false"
     />
   </transition>
+
+  <!-- 그룹 ID 수정 모달 -->
+  <Modal
+    v-if="isChangeGroupOpen"
+    type="confirm"
+    title="그룹 ID 수정"
+    :message="'변경할 그룹 ID를 입력해 주세요.\n(영문+숫자만 입력)'"
+    :cancel-label="'취소'"
+    :confirm-label="'변경'"
+    @cancel="closeChangeGroupModal"
+    @close="closeChangeGroupModal"
+    @confirm="confirmChangeGroup"
+  >
+    <div class="change_group_body">
+      <input
+        v-model="newGroupIdInput"
+        type="text"
+        placeholder="예: team2025"
+        class="change_group_input"
+      />
+      <p class="change_group_hint">
+        현재 그룹 ID: {{ groupId || '-' }}
+      </p>
+    </div>
+  </Modal>
 </template>
+
 <script setup>
-import { ref } from 'vue';
+import { ref, computed, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 import Header from '@/components/Header.vue';
 import TermsModal from '@/pages/signup/TermsModal.vue';
+import Modal from '@/components/Modal.vue';
+
+import { signOut } from 'firebase/auth';
+import { auth } from '@/firebase/firebaseInit';
+import { useModal } from '@/composables/useModal';
+import { useGroups } from '@/composables/useGroups';
+import { useToast } from '@/composables/useToast';
 
 const emit = defineEmits(['close-menu']);
 const emitClose = () => emit('close-menu');
-// 현재 열려 있는 메뉴 상태 저장
-const activeMenu = ref(null);
 
-// 토글 함수
+const router = useRouter();
+const { openModal } = useModal();
+const { showToast } = useToast();
+
+// 메뉴 상태
+const activeMenu = ref(null);
 const toggleMenu = (menuName) => {
   activeMenu.value = activeMenu.value === menuName ? null : menuName;
 };
 
-// 약관보기
+// 약관 모달
 const isTermsOpen = ref(false);
 const openTerms = () => (isTermsOpen.value = true);
+
+// 그룹 정보 composable
+const { currentGroupId, loadUserGroup, joinGroup } = useGroups();
+
+// 마이페이지 진입 시 그룹 정보 로딩
+onMounted(async () => {
+  await loadUserGroup();
+});
+
+const groupId = computed(() => currentGroupId.value || '');
+
+// 공통: 클립보드 복사
+const copyToClipboard = async (text) => {
+  if (!text) return false;
+
+  try {
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } else {
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      textarea.style.position = 'fixed';
+      textarea.style.opacity = '0';
+      document.body.appendChild(textarea);
+      textarea.focus();
+      textarea.select();
+      const result = document.execCommand('copy');
+      document.body.removeChild(textarea);
+      return result;
+    }
+  } catch (e) {
+    console.error('copyToClipboard error:', e);
+    return false;
+  }
+};
+
+// 로그아웃
+const handleLogout = async () => {
+  try {
+    await signOut(auth);
+  } catch (e) {
+    console.error('logout error:', e);
+  }
+
+  router.replace('/signup');
+};
+
+// 그룹 ID 확인 (복사 모달)
+const handleCheckGroupId = () => {
+  openModal('alert', '내 그룹 ID', groupId.value, {
+    okLabel: '복사',
+    async onConfirm() {
+      const copied = await copyToClipboard(groupId.value);
+      if (copied) {
+        showToast('클립보드에 복사됐어요~');
+      } else {
+        showToast('복사에 실패했어요. 다시 시도해 주세요.');
+      }
+    }
+  });
+};
+
+// 초대 링크 생성 (Base64로 groupId 가려서 전달)
+const buildInviteUrl = () => {
+  // Vite가 자동으로 넣어주는 base 경로 사용
+  const base = import.meta.env.BASE_URL || '/';
+  const url = new URL(base, window.location.origin);
+
+  if (!groupId.value) return url.toString();
+
+  const encoded = btoa(groupId.value); // 노출만 가리기용
+  url.searchParams.set('g', encoded);
+  return url.toString();
+};
+
+
+// 링크 공유하기
+const handleShareLink = async () => {
+  const inviteUrl = buildInviteUrl();
+
+  const shareData = {
+    title: '버그 리포트 그룹 초대',
+    text: '이 링크로 들어오면 우리 그룹 버그 리포트를 같이 쓸 수 있어요.',
+    url: inviteUrl
+  };
+
+  try {
+    if (navigator.share && (!navigator.canShare || navigator.canShare(shareData))) {
+      await navigator.share(shareData);
+      return;
+    }
+  } catch (e) {
+    console.error('navigator.share error', e);
+  }
+
+  const copied = await copyToClipboard(inviteUrl);
+
+  if (copied) {
+    openModal(
+      'alert',
+      '링크 공유하기',
+      '초대 링크를 클립보드에 복사했어요.\n카톡이나 메신저에 붙여넣어서 공유하면 돼요.'
+    );
+  } else {
+    openModal(
+      'alert',
+      '링크 공유하기',
+      '자동 공유에 실패했어요.\n주소창의 링크를 직접 복사해서 공유해 주세요.'
+    );
+  }
+};
+
+/* -----------------------
+ * 그룹 ID 수정 모달 관련
+ * ----------------------*/
+const isChangeGroupOpen = ref(false);
+const newGroupIdInput = ref('');
+
+const openChangeGroupModal = () => {
+  newGroupIdInput.value = '';
+  isChangeGroupOpen.value = true;
+};
+
+const closeChangeGroupModal = () => {
+  isChangeGroupOpen.value = false;
+};
+
+const confirmChangeGroup = async () => {
+  const raw = newGroupIdInput.value;
+  if (!raw) {
+    openModal('alert', '그룹 ID 수정', '변경할 그룹 ID를 입력해 주세요.');
+    return;
+  }
+
+  const value = raw.trim().toLowerCase();
+
+  if (!/^[a-z0-9]+$/.test(value)) {
+    openModal('alert', '그룹 ID 수정', '그룹 ID는 영문과 숫자만 사용할 수 있어요.');
+    return;
+  }
+
+  if (value === groupId.value) {
+    openModal('alert', '그룹 ID 수정', '현재 사용 중인 그룹 ID와 같아요.');
+    return;
+  }
+
+  try {
+    await joinGroup(value);
+    showToast('그룹 ID가 변경되었어요.');
+    isChangeGroupOpen.value = false;
+    emitClose(); // 마이페이지 닫고 메인으로 복귀
+  } catch (error) {
+    console.error('change group error:', error);
+    openModal(
+      'alert',
+      '그룹 ID 수정',
+      error.message || '그룹 변경 중 오류가 발생했어요.'
+    );
+  }
+};
 </script>
+
+<style scoped>
+.change_group_body {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.change_group_input {
+  width: 100%;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #d0d3dc;
+  font-size: 14px;
+}
+
+.change_group_input:focus {
+  outline: none;
+  border-color: #6000b4;
+}
+
+.change_group_hint {
+  font-size: 12px;
+  color: #848a9c;
+}
+</style>

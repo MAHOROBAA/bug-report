@@ -19,11 +19,17 @@
       <!-- 버튼 영역 -->
       <div class="modal_buttons" :class="`type_${type}`">
         <template v-if="type === 'confirm'">
-          <button class="btn_cancel" @click="emit('cancel')">취소</button>
-          <button class="btn_confirm" @click="emit('confirm')">삭제</button>
+          <button class="btn_cancel" @click="emit('cancel')">
+            {{ cancelLabel }}
+          </button>
+          <button class="btn_confirm" @click="emit('confirm')">
+            {{ confirmLabel }}
+          </button>
         </template>
         <template v-else>
-          <button class="btn_ok" @click="emit('confirm')">확인</button>
+          <button class="btn_ok" @click="emit('confirm')">
+            {{ okLabel }}
+          </button>
         </template>
       </div>
     </div>
@@ -34,9 +40,24 @@
 import { onMounted, onUnmounted } from 'vue';
 
 const props = defineProps({
-  type: String,
+  type: {
+    type: String,
+    default: 'alert'
+  },
   title: String,
-  message: String
+  message: String,
+  okLabel: {
+    type: String,
+    default: '확인'
+  },
+  cancelLabel: {
+    type: String,
+    default: '취소'
+  },
+  confirmLabel: {
+    type: String,
+    default: '삭제'
+  }
 });
 
 const emit = defineEmits(['confirm', 'cancel', 'close']);

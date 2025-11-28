@@ -152,34 +152,36 @@
                 <p class="count">{{ report.reactions?.[emoji] || 0 }}</p>
               </button>
             </div>
-            <!-- 댓글 섹션 -->
-            <div class="comment_section">
-              <div class="comment_header" @click="toggleComments(report.id)">
-                <img
-                  :src="
-                    isCommentOpen[report.id]
-                      ? commentCloseIcon
-                      : commentOpenIcon
-                  "
-                  alt="댓글 토글"
-                  class="comment_toggle_icon"
-                />
-                <p class="comment_title">댓글</p>
-              </div>
-
-              <transition name="fade">
-                <div v-if="isCommentOpen[report.id]" class="comment_area">
-                  <!-- 댓글 목록 -->
-                  <div class="comment_list">
-                    <div
-                      v-for="comment in comments[report.id]"
-                      :key="comment.id"
-                      class="comment_item"
-                    >
-                      <!-- 수정 중일 때 -->
-                      <template
-                        v-if="editingComments[comment.id] !== undefined"
-                      >
+          </div>
+        </div>
+        <!-- 댓글 섹션 -->
+        <div class="comment_section">
+          <div class="comment_header" @click="toggleComments(report.id)">
+            <img
+              :src="
+                isCommentOpen[report.id]
+                  ? commentCloseIcon
+                  : commentOpenIcon
+              "
+              alt="댓글 토글"
+              class="comment_toggle_icon"
+              :class="{ rotating: isCommentOpen[report.id] }"
+            />
+          </div>
+          <div class="comment_inner">
+            <!-- 댓글 목록: 접힘/펼침 + 페이드 -->
+            <transition name="fade">
+              <div v-if="isCommentOpen[report.id]" class="comment_area">
+                <!-- 댓글 목록 -->
+                <div class="comment_list">
+                  <div
+                    v-for="(comment, cIndex) in comments[report.id]"
+                    :key="comment.id"
+                    class="comment_item"
+                  >
+                    <!-- 수정 중일 때 -->
+                    <template v-if="editingComments[comment.id] !== undefined">
+                      <div class="comment_item_edit">
                         <input
                           v-model="editingComments[comment.id]"
                           class="comment_edit_input"
@@ -192,14 +194,15 @@
                             @click="saveComment(report.id, comment.id)"
                           />
                         </div>
-                      </template>
+                      </div>
+                    </template>
 
-                      <!-- 일반 표시 -->
-                      <template v-else>
+                    <!-- 일반 표시 -->
+                    <template v-else>
+                      <div class="comment_box"
+                        :class="`comment_box--type-${(cIndex % 3) + 1}`"
+                      >
                         <p class="comment_content">{{ comment.content }}</p>
-                        <p class="comment_date">
-                          {{ formatDate(comment.createdAt) }}
-                        </p>
                         <div
                           v-if="comment.authorId === localUserId"
                           class="comment_icons"
@@ -217,27 +220,30 @@
                             @click="deleteComment(report.id, comment.id)"
                           />
                         </div>
-                      </template>
-                    </div>
-                  </div>
-
-                  <!-- 댓글 입력 -->
-                  <div class="comment_input_row">
-                    <input
-                      v-model="newComments[report.id]"
-                      placeholder="댓글을 입력하세요"
-                      class="comment_input"
-                      @keyup.enter="addComment(report.id)"
-                    />
-                    <button
-                      class="comment_submit_btn"
-                      @click="addComment(report.id)"
-                    >
-                      등록
-                    </button>
+                      </div>
+                      <p class="comment_date item_registered">
+                        {{ formatDate(comment.createdAt) }}
+                      </p>
+                    </template>
                   </div>
                 </div>
-              </transition>
+              </div>
+            </transition>
+            <!-- 댓글 입력: 항상 노출 -->
+            <div class="comment_input_row">
+              <p class="comment_title">댓글</p>
+              <input
+                v-model="newComments[report.id]"
+                placeholder="댓글을 입력하세요"
+                class="comment_input"
+                @keyup.enter="addComment(report.id)"
+              />
+              <button
+                class="submit_btn"
+                @click="addComment(report.id)"
+              >
+                등록
+              </button>
             </div>
           </div>
         </div>
@@ -514,16 +520,44 @@ const deleteReport = (index) => {
 // --------------------------------------------------
 const formatDate = (date) => {
   if (!date) return '-';
+
   try {
+    // Firestore Timestamp 타입일 때
     if (typeof date.toDate === 'function') {
-      return date.toDate().toLocaleString('ko-KR', { hour12: false });
+      const d = date.toDate();
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      const h = String(d.getHours()).padStart(2, '0');
+      const min = String(d.getMinutes()).padStart(2, '0');
+      return `${y}-${m}-${day} ${h}:${min}`;
     }
-    return date;
+
+    // 이미 문자열(예: '2025-10-24 17:31')로 들어온 경우는 그대로 사용
+    if (typeof date === 'string') {
+      // 혹시 초까지 있는 경우 잘라주고 싶으면 아래 주석 풀어도 됨
+      return date.slice(0, 16);
+      return date;
+    }
+
+    // 그 외 타입 방어
+    const d = new Date(date);
+    if (!Number.isNaN(d.getTime())) {
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      const h = String(d.getHours()).padStart(2, '0');
+      const min = String(d.getMinutes()).padStart(2, '0');
+      return `${y}-${m}-${day} ${h}:${min}`;
+    }
+
+    return '-';
   } catch (e) {
     console.error('날짜 변환 오류:', e);
     return '-';
   }
 };
+
 
 // --------------------------------------------------
 // 댓글 기능 (서브컬렉션)
@@ -586,9 +620,36 @@ const saveComment = async (reportId, commentId) => {
 };
 
 const deleteComment = async (reportId, commentId) => {
-  const commentRef = doc(db, 'reports', reportId, 'comments', commentId);
-  await deleteDoc(commentRef);
+  modal.openModal(
+    'confirm',
+    '댓글 삭제',
+    '댓글을 삭제하시겠습니까?',
+    {
+      onConfirm: async () => {
+        try {
+          const commentRef = doc(
+            db,
+            'reports',
+            reportId,
+            'comments',
+            commentId
+          );
+          await deleteDoc(commentRef);
+
+          modal.openModal('alert', '삭제 완료', '댓글이 삭제되었습니다.');
+        } catch (e) {
+          console.error('댓글 삭제 오류:', e);
+          modal.openModal(
+            'alert',
+            '삭제 실패',
+            '댓글 삭제 중 오류가 발생했습니다.'
+          );
+        }
+      }
+    }
+  );
 };
+
 
 // --------------------------------------------------
 // Top 버튼

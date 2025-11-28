@@ -15,7 +15,8 @@ import {
 import { db } from "@/firebase/firebaseInit";
 
 const currentUser = ref(null);
-const loading = ref(true);
+const loading = ref(true);      // UI용 로딩
+const isAuthReady = ref(false); // 🔥 onAuthStateChanged 첫 응답 여부
 
 let isAuthInited = false;
 let unsubscribeAuth = null;
@@ -64,7 +65,8 @@ const initAuthListener = () => {
       }
     }
 
-    loading.value = false;
+    loading.value = false;     // UI 로딩 끝
+    isAuthReady.value = true;  // 🔥 auth 상태 1회 이상 수신 완료
   });
 };
 
@@ -90,6 +92,8 @@ export function useAuth() {
       throw error;
     } finally {
       loading.value = false;
+      // 로그인 후에는 이미 auth 리스너가 돌고 있을 것이므로
+      // isAuthReady는 그대로 true 유지
     }
   };
 
@@ -111,6 +115,7 @@ export function useAuth() {
     currentUser,
     isLoggedIn,
     loading,
+    isAuthReady,     // 🔥 여기 추가
     loginWithGoogle,
     logout,
   };

@@ -12,7 +12,7 @@
             :alt="theme === 'light' ? '달 아이콘' : '별 아이콘'"
           />
         </button>
-        <button class="help_btn" @click="modal.openModal('help', '도움말')">
+        <button class="help_btn" @click="openModal('help', '도움말')">
           <svg
             width="24"
             height="24"
@@ -74,28 +74,31 @@
         <ReportList v-else />
       </div>
     </main>
+
     <!-- 마이페이지 오버레이 -->
     <transition name="mypage-slide" :appear="false">
       <div v-if="isMenuOpen" class="mypage_overlay">
         <Mypage @close-menu="closeMenu" />
       </div>
     </transition>
+
+    <!-- 전역 모달 -->
     <Modal
-      v-if="!!modal && modal.isOpen.value"
-      :type="modal.modalType.value"
-      :title="modal.modalTitle.value"
-      :message="modal.modalMessage.value"
-      @confirm="modal.confirm"
-      @cancel="modal.cancel"
-      @close="modal.closeModal"
+      v-if="isOpen"
+      :type="modalType"
+      :title="modalTitle"
+      :message="modalMessage"
+      :ok-label="okLabel"
+      :cancel-label="cancelLabel"
+      :confirm-label="confirmLabel"
+      @confirm="confirm"
+      @cancel="cancel"
+      @close="closeModal"
     >
       <!-- 도움말 전용 콘텐츠 (type === 'help'일 때만 보이게) -->
       <template #help>
         <div class="help_list">
           <p class="help_text">1. 자유롭게 등록/수정/삭제가 가능합니다.</p>
-          <!-- <p class="help_text">
-            2. 리포트 내용 영역에 이미지를 드래그/붙여넣기 할 수 있습니다.
-          </p> -->
           <p class="help_text">2. 모든 리포트는 익명으로 작성됩니다.</p>
           <p class="help_text">3. 카테고리 추가는 관리자에게 요청해 주세요.</p>
         </div>
@@ -112,21 +115,30 @@
         </div>
       </template>
     </Modal>
+
+    <!-- 전역 토스트 -->
+    <Toast />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { ref, onMounted, onBeforeUnmount, watch } from 'vue';
+import { useRouter } from 'vue-router';
 import Header from '@/components/Header.vue';
 import ReportForm from '@/pages/report/ReportForm.vue';
 import ReportList from '@/pages/report/ReportList.vue';
 import Modal from '@/components/Modal.vue';
+import Toast from '@/components/Toast.vue';
 import { useModal } from '@/composables/useModal.js';
 import { useTheme } from '@/composables/useTheme.js';
+import { useGroups } from '@/composables/useGroups';
+import { useAuth } from '@/composables/useAuth';
 import moonIcon from '@/assets/images/night_icon.png';
 import starIcon from '@/assets/images/light_icon.png';
 import notiIcon from '@/assets/images/notification_icon.png';
 import Mypage from '@/pages/mypage/index.vue';
+
+const router = useRouter();
 
 // 마이페이지 열고 닫기
 const isMenuOpen = ref(false);
@@ -137,10 +149,28 @@ const closeMenu = () => {
   isMenuOpen.value = false;
 };
 
-const modal = useModal();
+// 전역 모달 상태
+const {
+  isOpen,
+  modalType,
+  modalTitle,
+  modalMessage,
+  okLabel,
+  cancelLabel,
+  confirmLabel,
+  openModal,
+  closeModal,
+  confirm,
+  cancel
+} = useModal();
+
 const activeTab = ref('form');
 const isMobile = ref(false);
 const { theme, toggleTheme } = useTheme();
+
+// 그룹 / 유저 정보
+const { currentGroupId, loadUserGroup } = useGroups();
+const { currentUser, isAuthReady } = useAuth();
 
 // 공지사항 배열
 const notices = [
@@ -155,18 +185,48 @@ const notices = [
 // 공지 모달 열기
 const openNotice = () => {
   const message = notices.join('\n');
-  modal.openModal('alert', '공지사항', message);
+  openModal('alert', '공지사항', message);
 };
 
 const checkScreen = () => {
   isMobile.value = window.innerWidth < 1024;
 };
+
 onMounted(() => {
   checkScreen();
   window.addEventListener('resize', checkScreen);
+
+  // 🔥 Firebase Auth가 "준비"된 이후에만 라우팅/그룹 체크
+  const stop = watch(
+    () => isAuthReady.value,
+    async (ready) => {
+      if (!ready) return; // 아직 onAuthStateChanged 응답 안 온 상태이면 기다림
+
+      stop(); // 한 번만 실행
+
+      // 진짜 로그아웃 상태라면 로그인 화면으로
+      if (!currentUser.value) {
+        router.replace('/signup');
+        return;
+      }
+
+      // 로그인 상태면 그룹 정보 로딩
+      await loadUserGroup();
+
+      // 로그인은 했는데 그룹이 없으면 → 그룹 설정 플로우로
+      if (!currentGroupId.value) {
+        router.replace('/signup'); // 필요하면 '/signup/groupjoin' 등으로 변경 가능
+      }
+    },
+    { immediate: true }
+  );
 });
-onBeforeUnmount(() => window.removeEventListener('resize', checkScreen));
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', checkScreen);
+});
 </script>
+
 <style scoped lang="scss">
 #app,
 .app_wrap,
