@@ -1,18 +1,22 @@
 <template>
-  <transition :name="transitionName" mode="out-in">
-    <router-view />
-  </transition>
+  <div class="app_root">
+    <transition :name="transitionName" mode="out-in">
+      <router-view />
+    </transition>
+    <Toast />
+  </div>
 </template>
 
 <script setup>
 import { ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
+import Toast from '@/components/Toast.vue';
 
 const route = useRoute();
 const transitionName = ref('slide-left');
 
 watch(
-  () => route.fullPath,
+  () => route.path, // fullPath 말고 path 기준이 더 안전해
   (to, from) => {
     const fadeRoutes = ['/splash', '/signup'];
 
@@ -30,7 +34,7 @@ watch(
       transitionName.value = 'slide-left';
     }
   },
-  { immediate: true } // 첫 진입 시에도 한 번 계산
+  { immediate: true }
 );
 </script>
 

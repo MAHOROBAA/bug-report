@@ -25,11 +25,15 @@ const { toasts } = useToast();
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .toast_item {
-  min-width: 200px;
-  max-width: 320px;
+  display: flex;
+  width: fit-content;
+  white-space: nowrap;
   padding: 10px 16px;
   margin-top: 8px;
   border-radius: 999px;

@@ -115,9 +115,6 @@
         </div>
       </template>
     </Modal>
-
-    <!-- 전역 토스트 -->
-    <Toast />
   </div>
 </template>
 
@@ -128,7 +125,6 @@ import Header from '@/components/Header.vue';
 import ReportForm from '@/pages/report/ReportForm.vue';
 import ReportList from '@/pages/report/ReportList.vue';
 import Modal from '@/components/Modal.vue';
-import Toast from '@/components/Toast.vue';
 import { useModal } from '@/composables/useModal.js';
 import { useTheme } from '@/composables/useTheme.js';
 import { useGroups } from '@/composables/useGroups';

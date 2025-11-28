@@ -37,9 +37,11 @@ import { useRouter } from 'vue-router';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '@/firebase/firebaseInit';
 import { useGroups } from '@/composables/useGroups';
+import { useToast } from '@/composables/useToast';
 
 const router = useRouter();
 const { currentGroupId, loadUserGroup, createGroup } = useGroups();
+const { showToast } = useToast();
 
 const groupIdInput = ref('');
 const isChecked = ref(false);
@@ -60,12 +62,12 @@ const checkDuplicate = async () => {
   const value = groupIdInput.value.trim().toLowerCase();
 
   if (!value) {
-    window.alert('그룹 ID를 입력해 주세요.');
+    showToast('그룹 ID를 입력해 주세요.');
     return;
   }
 
   if (!/^[a-z0-9]+$/.test(value)) {
-    window.alert('영문과 숫자만 사용할 수 있습니다.');
+    showToast('영문과 숫자만 사용할 수 있습니다.');
     return;
   }
 
@@ -74,15 +76,15 @@ const checkDuplicate = async () => {
     const snap = await getDoc(groupRef);
 
     if (snap.exists()) {
-      window.alert('이미 존재하는 그룹 ID입니다.');
+      showToast('이미 존재하는 그룹 ID입니다.');
       isChecked.value = false;
     } else {
-      window.alert('사용 가능한 그룹 ID입니다.');
+      showToast('사용 가능한 그룹 ID입니다.');
       isChecked.value = true;
     }
   } catch (error) {
     console.error('duplicate check error:', error);
-    window.alert('중복 검사 중 오류가 발생했습니다.');
+    showToast('중복 검사 중 오류가 발생했습니다.');
   }
 };
 
@@ -93,21 +95,22 @@ const handleCreateGroup = async () => {
   const value = groupIdInput.value.trim().toLowerCase();
 
   if (!value) {
-    window.alert('그룹 ID를 입력해 주세요.');
+    showToast('그룹 ID를 입력해 주세요.');
     return;
   }
 
   if (!isChecked.value) {
-    window.alert('먼저 중복 검사를 진행해 주세요.');
+    showToast('먼저 중복 검사를 진행해 주세요.');
     return;
   }
 
   try {
     await createGroup(value);
+    showToast('그룹이 생성되었습니다.');
     router.push('/report');
   } catch (error) {
     console.error('createGroup error:', error);
-    window.alert(error.message || '그룹 생성에 실패했습니다.');
+    showToast(error.message || '그룹 생성에 실패했습니다.');
   }
 };
 

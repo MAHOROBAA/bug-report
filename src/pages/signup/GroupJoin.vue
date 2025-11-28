@@ -29,13 +29,11 @@
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useGroups } from '@/composables/useGroups';
+import { useToast } from '@/composables/useToast';
 
 const router = useRouter();
-const {
-  currentGroupId,
-  loadUserGroup,
-  joinGroup
-} = useGroups();
+const { currentGroupId, loadUserGroup, joinGroup } = useGroups();
+const { showToast } = useToast();
 
 const groupIdInput = ref('');
 
@@ -44,7 +42,7 @@ onMounted(async () => {
   await loadUserGroup();
 
   if (currentGroupId.value) {
-    router.push('/report'); // 실제 리포트 경로에 맞게 수정 가능
+    router.push('/report');
   }
 });
 
@@ -52,21 +50,21 @@ const handleJoinGroup = async () => {
   const value = groupIdInput.value.trim();
 
   if (!value) {
-    window.alert('그룹 ID를 입력해 주세요.');
+    showToast('그룹 ID를 입력해 주세요.');
     return;
   }
 
   try {
     await joinGroup(value);
+    showToast('그룹에 참여했어요.');
     router.push('/report');
   } catch (error) {
     console.error('joinGroup error:', error);
-    window.alert(error.message || '그룹 참여에 실패했어요. 다시 시도해 주세요.');
+    showToast(error.message || '그룹 참여에 실패했어요. 다시 시도해 주세요.');
   }
 };
 
 const goToGroupCreate = () => {
-  // 그룹 생성 화면으로 이동 (GroupCreate.vue가 연결된 경로)
   router.push('/signup/groupcreate');
 };
 </script>
