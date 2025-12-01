@@ -47,15 +47,26 @@ export function useReports() {
       reportsCollection,
       where('groupId', '==', groupId), // ✅ 그룹별 필터
       orderBy('createdAt', 'desc'),
-      limit(20)
+      // limit(20)
     );
-
     unsubscribe = onSnapshot(
       q,
       { includeMetadataChanges: true },
       (snapshot) => {
+        console.log('=== snapshot 시작 ===');
+        console.log('query groupId:', groupId);
+        console.log('docs length:', snapshot.docs.length);
+
         const docs = snapshot.docs.map((d) => {
           const data = d.data();
+
+          console.log('doc debug:', {
+            id: d.id,
+            groupId: data.groupId,
+            createdAt: data.createdAt,
+            createdAtType: typeof data.createdAt,
+            hasSeconds: !!data.createdAt?.seconds,
+          });
 
           let createdAt = data.createdAt;
           if (createdAt && createdAt.seconds) {
@@ -72,7 +83,7 @@ export function useReports() {
             id: d.id,
             ...data,
             images: data.images || [],
-            createdAt
+            createdAt,
           };
         });
 
@@ -82,12 +93,59 @@ export function useReports() {
           isFetched.value = true;
         }
 
-        console.log('✅ 그룹 기반 Firestore 데이터:', groupId, reports.value);
+        console.log(
+          '✅ 최종 reports:',
+          reports.value.map((r) => ({
+            id: r.id,
+            groupId: r.groupId,
+            createdAt: r.createdAt,
+          }))
+        );
+        console.log('=== snapshot 끝 ===');
       },
       (error) => {
         console.error('Firestore 구독 오류:', error);
       }
     );
+
+    // unsubscribe = onSnapshot(
+    //   q,
+    //   { includeMetadataChanges: true },
+    //   (snapshot) => {
+    //     const docs = snapshot.docs.map((d) => {
+    //       const data = d.data();
+
+    //       let createdAt = data.createdAt;
+    //       if (createdAt && createdAt.seconds) {
+    //         const date = new Date(createdAt.seconds * 1000);
+    //         const y = date.getFullYear();
+    //         const m = String(date.getMonth() + 1).padStart(2, '0');
+    //         const day = String(date.getDate()).padStart(2, '0');
+    //         const h = String(date.getHours()).padStart(2, '0');
+    //         const min = String(date.getMinutes()).padStart(2, '0');
+    //         createdAt = `${y}-${m}-${day} ${h}:${min}`;
+    //       }
+
+    //       return {
+    //         id: d.id,
+    //         ...data,
+    //         images: data.images || [],
+    //         createdAt
+    //       };
+    //     });
+
+    //     reports.value = docs;
+
+    //     if (!isFetched.value && docs.length > 0) {
+    //       isFetched.value = true;
+    //     }
+
+    //     console.log('✅ 그룹 기반 Firestore 데이터:', groupId, reports.value);
+    //   },
+    //   (error) => {
+    //     console.error('Firestore 구독 오류:', error);
+    //   }
+    // );
   };
 
   // -------------------------------------------------------------
