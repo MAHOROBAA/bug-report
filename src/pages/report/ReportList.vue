@@ -204,7 +204,7 @@
                       >
                         <p class="comment_content">{{ comment.content }}</p>
                         <div
-                          v-if="comment.authorId === localUserId"
+                          v-if="comment.authorId === currentUser?.uid"
                           class="comment_icons"
                         >
                           <img
@@ -301,6 +301,7 @@ import CustomSelect from '../../components/CustomSelect.vue';
 import Modal from '../../components/Modal.vue';
 import { useModal } from '../../composables/useModal.js';
 import { useReports } from '../../composables/useReports.js';
+import { currentUser } from '@/composables/useAuth.js';
 import {
   collection,
   addDoc,
@@ -567,15 +568,6 @@ const newComments = ref({});
 const editingComments = ref({});
 const isCommentOpen = ref({});
 
-// UUID로 사용자 구분
-const localUserId =
-  localStorage.getItem('localUserId') ||
-  (() => {
-    const id = crypto.randomUUID();
-    localStorage.setItem('localUserId', id);
-    return id;
-  })();
-
 const toggleComments = (reportId) => {
   isCommentOpen.value[reportId] = !isCommentOpen.value[reportId];
   if (isCommentOpen.value[reportId] && !comments.value[reportId]) {
@@ -601,7 +593,7 @@ const addComment = async (reportId) => {
   const commentsRef = collection(db, 'reports', reportId, 'comments');
   await addDoc(commentsRef, {
     content: text.trim(),
-    authorId: localUserId,
+    authorId: currentUser.value?.uid,
     createdAt: serverTimestamp()
   });
   newComments.value[reportId] = '';

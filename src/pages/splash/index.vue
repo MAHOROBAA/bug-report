@@ -57,7 +57,7 @@ const router = useRouter()
 onMounted(() => {
   setTimeout(() => {
     router.replace('/signup')
-  }, 3000)
+  }, 2000)
 })
 </script>
 <style scoped>

@@ -14,7 +14,7 @@ import {
 } from "firebase/firestore";
 import { db } from "@/firebase/firebaseInit";
 
-const currentUser = ref(null);
+export const currentUser = ref(null);
 const loading = ref(true);      // UI용 로딩
 const isAuthReady = ref(false); // 🔥 onAuthStateChanged 첫 응답 여부
 
