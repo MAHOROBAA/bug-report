@@ -19,12 +19,11 @@
 <script setup>
 import { ref } from 'vue'
 
-// ✅ 내부 카테고리 고정
 const categories = [
-  '❓ 기억손실',
-  '☣ 말바꾸기',
-  '🤯 황당언행',
-  '💫 인성확인'
+  '😤 업무과부하',
+  '😶 소통문제',
+  '😩 반복실수',
+  '💭 감정소진'
 ]
 
 // ✅ props & emit (v-model용)

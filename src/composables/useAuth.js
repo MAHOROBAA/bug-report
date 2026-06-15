@@ -3,6 +3,7 @@ import { ref, computed, onMounted } from "vue";
 import { auth, googleProvider } from "@/firebase/firebaseInit";
 import {
   signInWithPopup,
+  signInWithEmailAndPassword,
   signOut,
   onAuthStateChanged,
 } from "firebase/auth";
@@ -10,9 +11,13 @@ import {
   doc,
   getDoc,
   setDoc,
+  deleteDoc,
   serverTimestamp,
 } from "firebase/firestore";
 import { db } from "@/firebase/firebaseInit";
+
+const GUEST_EMAIL = "guest@portfolio.demo";
+const GUEST_PASSWORD = "guest1234!";
 
 export const currentUser = ref(null);
 const loading = ref(true);      // UI용 로딩
@@ -76,6 +81,32 @@ export function useAuth() {
 
   const isLoggedIn = computed(() => !!currentUser.value);
 
+  const isGuest = computed(() => currentUser.value?.email === GUEST_EMAIL);
+
+  const loginAsGuest = async () => {
+    try {
+      loading.value = true;
+      const result = await signInWithEmailAndPassword(auth, GUEST_EMAIL, GUEST_PASSWORD);
+      currentUser.value = result.user;
+
+      const uid = result.user.uid;
+      await setDoc(doc(db, "users", uid), { groupId: null }, { merge: true });
+
+      try {
+        await deleteDoc(doc(db, "groups", "portfolio", "members", uid));
+      } catch (e) {
+        // 멤버 문서가 없어도 무시
+      }
+
+      return result.user;
+    } catch (error) {
+      console.error("Guest login error:", error);
+      throw error;
+    } finally {
+      loading.value = false;
+    }
+  };
+
   const loginWithGoogle = async () => {
     try {
       loading.value = true;
@@ -114,9 +145,11 @@ export function useAuth() {
   return {
     currentUser,
     isLoggedIn,
+    isGuest,
     loading,
-    isAuthReady,     // 🔥 여기 추가
+    isAuthReady,
     loginWithGoogle,
+    loginAsGuest,
     logout,
   };
 }

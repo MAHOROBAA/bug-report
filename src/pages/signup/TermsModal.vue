@@ -85,6 +85,9 @@
         </p>
       </div>
       <div v-if="showAgree" class="termagree_wrapper">
+        <p v-if="isGuest" class="guest_notice">
+          체험 계정으로 접속 중이에요. 약관에 동의하고 다음으로 넘어가세요.
+        </p>
         <p class="terminfo">약관을 읽고 동의 하신다면 다음을 눌러 주세요.</p>
         <div class="modal_buttons type_confirm">
           <button class="btn_cancel" @click="handleCancel">뒤로</button>
@@ -102,16 +105,14 @@ import { useAuth } from '@/composables/useAuth';
 import { useGroups } from '@/composables/useGroups';
 
 const props = defineProps({
-  // 마이페이지에서 볼 때는 false로 내려서 하단 버튼 숨김
   showAgree: { type: Boolean, default: true },
-  // 라우터(/signup/terms)로 띄울 때는 true로 켜서 닫기 시 router 이동
   useRouterClose: { type: Boolean, default: false }
 });
 
 const emit = defineEmits(['close-terms']);
 
 const router = useRouter();
-const { isLoggedIn, loginWithGoogle } = useAuth();
+const { isLoggedIn, isGuest, loginWithGoogle } = useAuth();
 const { currentGroupId, loadUserGroup } = useGroups();
 
 const closeTerms = () => {
@@ -153,8 +154,8 @@ const handleAgree = async () => {
 };
 
 onMounted(async () => {
-  // 라우터 모드에서 이미 로그인 상태로 들어오면 바로 다음 단계로 넘겨도 됨
-  if (props.useRouterClose && isLoggedIn.value) {
+  // 게스트는 약관 화면을 직접 보여줌 (자동 이동 제외)
+  if (props.useRouterClose && isLoggedIn.value && !isGuest.value) {
     await goNextAfterLogin();
   }
 });
@@ -204,6 +205,13 @@ onMounted(async () => {
   font-size: 14px;
   line-height: 1.6;
   color: #393d48;
+}
+
+.guest_notice {
+  font-size: 13px;
+  color: #6000b4;
+  margin-bottom: 6px;
+  line-height: 1.5;
 }
 
 @media (max-width: 430px) {

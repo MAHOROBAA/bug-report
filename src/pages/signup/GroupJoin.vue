@@ -3,6 +3,10 @@
     <p class="title">BUG REPORT</p>
 
     <div class="groupid_wrapper">
+      <p v-if="isGuest" class="guest_notice">
+        체험 계정이에요. 체험용 그룹 ID는 <strong>portfolio</strong> 예요.<br />
+        아래 '그룹 ID 생성하기'를 눌러서 입력해 보세요.
+      </p>
       <div class="form_field">
         <input
           type="text"
@@ -30,10 +34,12 @@ import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useGroups } from '@/composables/useGroups';
 import { useToast } from '@/composables/useToast';
+import { useAuth } from '@/composables/useAuth';
 
 const router = useRouter();
 const { currentGroupId, loadUserGroup, joinGroup } = useGroups();
 const { showToast } = useToast();
+const { isGuest } = useAuth();
 
 const groupIdInput = ref('');
 
@@ -68,3 +74,11 @@ const goToGroupCreate = () => {
   router.push('/signup/groupcreate');
 };
 </script>
+<style scoped>
+.guest_notice {
+  font-size: 13px;
+  color: #6000b4;
+  line-height: 1.5;
+  margin-bottom: 8px;
+}
+</style>

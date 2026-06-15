@@ -7,6 +7,9 @@
         그룹 ID를 설정하세요.<br />
         다른 팀원이 입력할 ID입니다.
       </p>
+      <p v-if="isGuest" class="guest_notice">
+        체험용 그룹 ID: <strong>portfolio</strong> 를 입력해보세요
+      </p>
 
       <div class="filter_row">
         <div class="form_field">
@@ -38,10 +41,12 @@ import { doc, getDoc } from 'firebase/firestore';
 import { db } from '@/firebase/firebaseInit';
 import { useGroups } from '@/composables/useGroups';
 import { useToast } from '@/composables/useToast';
+import { useAuth } from '@/composables/useAuth';
 
 const router = useRouter();
-const { currentGroupId, loadUserGroup, createGroup } = useGroups();
+const { currentGroupId, loadUserGroup, createGroup, joinGroup } = useGroups();
 const { showToast } = useToast();
+const { isGuest } = useAuth();
 
 const groupIdInput = ref('');
 const isChecked = ref(false);
@@ -99,6 +104,19 @@ const handleCreateGroup = async () => {
     return;
   }
 
+  // 게스트가 portfolio 입력 시 → joinGroup으로 처리
+  if (isGuest.value && value === 'portfolio') {
+    try {
+      await joinGroup(value);
+      showToast('그룹이 생성되었습니다.');
+      router.push('/report');
+    } catch (error) {
+      console.error('guest joinGroup error:', error);
+      showToast(error.message || '그룹 참여에 실패했습니다.');
+    }
+    return;
+  }
+
   if (!isChecked.value) {
     showToast('먼저 중복 검사를 진행해 주세요.');
     return;
@@ -120,4 +138,13 @@ const handleCreateGroup = async () => {
 const goBack = () => {
   router.push('/signup/groupjoin');
 };
+
 </script>
+<style scoped>
+.guest_notice {
+  font-size: 13px;
+  color: #6000b4;
+  line-height: 1.5;
+  margin-top: 4px;
+}
+</style>
