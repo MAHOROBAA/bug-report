@@ -1,5 +1,129 @@
-# Vue 3 + Vite
+# Bug Report
 
-This template should help get you started developing with Vue 3 in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+문제를 기록하고 공유하며 해결 과정을 추적하기 위한 웹 서비스
 
-Learn more about IDE Support for Vue in the [Vue Docs Scaling up Guide](https://vuejs.org/guide/scaling-up/tooling.html#ide-support).
+---
+
+## 📌 프로젝트 소개
+
+Bug Report는 문제 제보와 개선 요청을 체계적으로 기록하고 공유하기 위해 제작한 웹 서비스입니다.
+
+업무를 진행하다 보면 다양한 문제와 개선 의견이 발생하지만, 메신저나 구두 전달에 의존할 경우 기록이 누락되거나 진행 상황을 추적하기 어려운 경우가 많습니다.
+
+이 프로젝트는 문제를 등록하고, 댓글로 의견을 나누며, 해결 과정을 공유할 수 있는 환경을 제공하기 위해 기획 및 개발했습니다.
+
+---
+
+## 🔗 Links
+
+* Demo : https://서비스주소입력
+* Repository : https://github.com/저장소주소입력
+
+---
+
+## 🖼️ Preview
+
+### Report 작성
+
+![Report 작성 화면](./src/assets/images/report.png)
+
+### Report 목록
+
+![Report 목록 화면](./src/assets/images/reportlist.png)
+
+### My Page
+
+![My Page 화면](./src/assets/images/mypage.png)
+
+---
+
+## ✨ 주요 기능
+
+### 버그 등록
+
+* 문제 및 개선 요청 등록
+* 카테고리 분류
+* 상태 관리
+
+### 댓글 기능
+
+* 댓글 작성 및 조회
+* 댓글 개수 표시
+* 신규 댓글 등록 시 자동 펼침
+
+### 그룹 기능
+
+* 그룹 생성
+* 그룹 참여
+* 그룹별 게시글 관리
+
+### 게스트 체험
+
+* 게스트 계정 로그인 지원
+* 별도 회원가입 없이 주요 기능 체험 가능
+
+---
+
+## 🛠 Tech Stack
+
+### Frontend
+
+* Vue 3
+* Vue Router
+* Vite
+* SCSS
+
+### Backend / Infrastructure
+
+* Firebase Authentication
+* Cloud Firestore
+* GitHub Pages
+
+---
+
+## 👤 Contribution
+
+본 프로젝트는 개인 프로젝트로 진행되었으며 아래 영역을 직접 수행했습니다.
+
+* 서비스 기획
+* UI/UX 설계
+* 프론트엔드 개발
+* Firebase 데이터 구조 설계
+* 인증 기능 구현
+* 댓글 및 그룹 기능 구현
+* GitHub Pages 배포
+* 포트폴리오용 게스트 체험 환경 구성
+
+---
+
+## 💡 구현 포인트
+
+### 게스트 체험 환경 구축
+
+포트폴리오 검토자가 회원가입 없이 서비스를 체험할 수 있도록 게스트 로그인 기능을 구현했습니다.
+
+게스트 계정 전용 안내 문구와 접근 흐름을 추가하여 주요 기능을 자연스럽게 확인할 수 있도록 구성했습니다.
+
+### Firebase Authentication 기반 인증
+
+Firebase Authentication을 활용하여 이메일 회원가입 및 로그인 기능을 구현했습니다.
+
+### 댓글 수 최적화
+
+목록 화면에서 댓글 개수를 즉시 확인할 수 있도록 `commentCount` 필드를 별도로 관리하도록 개선했습니다.
+
+### 그룹 단위 데이터 관리
+
+그룹 생성 및 참여 기능을 통해 게시글을 그룹별로 구분하여 관리할 수 있도록 설계했습니다.
+
+---
+
+## 📝 Retrospective
+
+이 프로젝트는 문제를 기록하고 공유하는 과정을 더 효율적으로 만들기 위해 시작했습니다.
+
+기획부터 개발, 배포까지 전 과정을 직접 수행하며 서비스 구조 설계, Firebase 활용, 인증 처리, 사용자 경험 개선에 대한 경험을 쌓을 수 있었습니다.
+
+특히 단순 기능 구현보다 사용자가 문제를 등록하고 의견을 공유하며 해결 과정을 추적할 수 있는 흐름을 설계하는 데 집중했습니다.
+
+또한 포트폴리오 공개를 위해 게스트 체험 기능, 더미 데이터 구성, 보안 설정(API Key 제한) 및 배포 환경 정비를 진행하며 실제 서비스 운영 관점의 경험도 함께 반영했습니다.
